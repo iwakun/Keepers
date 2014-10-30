@@ -23,11 +23,11 @@ set fileformat=unix " set proper <return> options
 set nowrap " don't wrap lines
 set autoindent
 set tabstop=4 shiftwidth=4 softtabstop=4 " tabs set
-set expandtab " uses spaces, not real tabs
+" set expandtab " uses spaces, not real tabs
 set visualbell " flash screen instead of beep
 set ruler " shows location in status bar
 set showcmd " shows command in status bar
-set statusline=%F%m%r%h%w\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\  
+set statusline=%F%m%r%h%w=%c,%l/%L\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\  
 set laststatus=2 " show the status line
 set lz " screen not redrawn during macro execution
 set showmode " show what mode I'm in
@@ -38,11 +38,27 @@ set display=lastline " shows as much of the last line as possible
 set history=100 " command history stored
 set hidden " keep buffers in memory
 set spell " turn on spelling errors
+set formatoptions+=m " Formatting for muli-byte characters (Japanese)
 
 syntax on
 set t_Co=256
 let g:impact_transbg=1
-colo impact
+if(has('gui_running'))
+    " colo watermark
+    colo lucius
+    " colo inkpot
+    " colo pacific
+    set lines=60
+    set columns=225
+    set gfn=Ubuntu\ Mono\ 12
+	set guioptions-=T " Remove Toolbar
+	set guioptions-=r " Remove right scrollbar
+	set guioptions-=l " Remove left scrollbar
+	set guioptions-=R " Remove left scrollbar
+	set guioptions-=L " Remove left scrollbar
+else
+    colo impact
+endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding Options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -62,10 +78,6 @@ map <C-F12> <Esc>^xx$xx<Esc>
 map <C-F9> <Esc>I<!--<Esc>A--><Esc>
 " Reverse the above
 map <C-F10> <Esc>^xxxx$xxx<Esc>
-" Open Window Manager
-map <C-w><C-t> :WMToggle<cr>
-map <C-w><C-f> :FirstExplorerWindow<cr>
-map <C-w><C-b> :BottomExplorerWindow<cr>
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Netrw Settings
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -73,9 +85,6 @@ let g:netrw_ftp_cmd="ftp -p"
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Windows Manager Settings
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:winManagerWidth=30
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Autocomplete
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"filetype plugin on
-"autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+filetype plugin on
+autocmd BufNewFile,BufRead *.less set filetype=less
+autocmd BufNewFile,BufRead *.ejs set filetype=html
