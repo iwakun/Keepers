@@ -1,3 +1,8 @@
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Pathogen
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+execute pathogen#infect()
+
 set nocompatible " turn off old vi compatibility
 cd ~/Documents/Websites
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -25,6 +30,7 @@ set autoindent
 set tabstop=4 shiftwidth=4 softtabstop=4 " tabs set
 " set expandtab " uses spaces, not real tabs
 set visualbell " flash screen instead of beep
+set noerrorbells " no beeping on error
 set ruler " shows location in status bar
 set showcmd " shows command in status bar
 set statusline=%F%m%r%h%w=%c,%l/%L\ [ASCII=\%03.3b]\ [HEX=\%02.2B]\  
@@ -44,10 +50,7 @@ syntax on
 set t_Co=256
 let g:impact_transbg=1
 if(has('gui_running'))
-    " colo watermark
     colo lucius
-    " colo inkpot
-    " colo pacific
     set lines=60
     set columns=225
     set gfn=Ubuntu\ Mono\ 12
@@ -58,6 +61,7 @@ if(has('gui_running'))
 	set guioptions-=L " Remove left scrollbar
 else
     colo impact
+	set title " change the terminal's title
 endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding Options
@@ -74,7 +78,7 @@ set foldopen-=undo
 map <C-F11> <Esc>I/*<Esc>A*/<Esc>
 " Reverse the above
 map <C-F12> <Esc>^xx$xx<Esc>
-" Add <!-- --> to commen (X/HT)ML
+" Add <!-- --> to comment (X/HT)ML
 map <C-F9> <Esc>I<!--<Esc>A--><Esc>
 " Reverse the above
 map <C-F10> <Esc>^xxxx$xxx<Esc>
