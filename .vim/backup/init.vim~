@@ -75,13 +75,10 @@ set scrolloff=3 " Don't let the cursor touch the edge of the viewport
 syntax on
 let g:javascript_enable_domhtmlcss = 1
 
-if has('nvim')
-    set termguicolors
-endif
+set termguicolors
 set t_Co=256
 set background=dark
 colo tender
-let g:tender_lightline = 1
 let g:lightline = { 'colorscheme': 'tender' }
 set title " change the terminal's title
 if has('mouse')
