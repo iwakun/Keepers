@@ -14,6 +14,7 @@ Plug 'groenewege/vim-less'
 Plug 'StanAngeloff/php.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'jelera/vim-javascript-syntax'
+Plug 'leafgarland/typescript-vim'
 "themes
 Plug '29decibel/codeschool-vim-theme'
 Plug 'ciaranm/inkpot'
@@ -92,7 +93,7 @@ endif
 " Folding Options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set foldenable
-set foldmethod=syntax
+set foldmethod=indent
 set foldlevel=100
 set foldopen-=search
 set foldopen-=undo

@@ -1,0 +1,202 @@
+<?php
+require_once('includes/boot.inc.php');
+
+$courses_list = Course::getCoursesByCategory();
+$libraries = Library::getFeaturedLibraries();
+
+$p->title = 'IT Courses &amp; Online Classes | Application Training,
+    Certification Programs and Learn How To Program';
+$p->description = 'IT courses, training classes and online elearning in ITIL,
+    Android programming, iOS5, Google, Microsoft, Java, Linux, Device Drivers,
+    Oracle, SQL, APEX, Perl, Python, C+, USB, Windows 7 and more.';
+$_script =<<<EOB
+jQuery(document).on('ready', function() {
+    jQuery('.account-link').addClass('expanded');
+    setTimeout(function() {
+        jQuery('.account-link').removeClass('expanded');
+    }, 2000);
+});
+EOB;
+$p->addOnDocReady($_script);
+
+// Notices
+$sql = "SELECT * FROM notice WHERE site = ?";
+$notices = $db->read($sql, array(GG_SITE));
+?>
+<?php include(GG_ROOT.'/includes/header.php'); ?>
+<?php if(!empty($notices)): ?>
+    <div class="gg-messages permanent">
+        <div class="gg-messages-inner">
+            <div class="notices">
+                <?php foreach($notices as $_item): ?>
+                    <?= $_item['notice'] ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+<div class="main-banner banner-home">
+    <div class="main-banner-background">
+        <div class="main-banner-background-mask"></div>
+    </div>
+    <div class="main-banner-content">
+        <h2 style="font-size: 44px; text-align: center;">
+            Create Your Own Success
+            <span style="display: block; font-size: 17px;">
+                Unleash the Power of Your Mind. Learn a New Technology Today!
+            </span>
+        </h2>
+        <div class="featured-libraries">
+            <h3 style="font-size: 21px; font-style: normal;">
+				Professionals Prepare you to Succeed. Online Anytime 24/7.
+			</h3>
+            <?php foreach($libraries as $library): ?>
+                <?php $courses = $library->getCourses() ?>
+                <a
+                    href="<?= $library->getUrl() ?>"
+                    class="library">
+                    <span class="library-icon"></span>
+                    <span class="library-content">
+                        <span class="library-title"><?= $library->getName() ?></span>
+                        <span class="library-desc"><?= count($courses) ?> Courses</span>
+                    </span>
+                    <span class="library-cta">
+                        Get Started >
+                    </span>
+                </a>
+            <?php endforeach; ?>
+            <a href="/training/courses/" class="banner-home-cta">
+                View the entire course catalog &nbsp; <span>&gt;</span>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="home-callout">
+    <strong>Advance your Career today.</strong> Create your free account.
+    <span
+        class="button-primary-medium"
+        data-action="overlay-register"
+        href="/join/register.php">
+        Free Account
+    </span>
+</div>
+<div class="main-secondary">
+    <div class="icon-box">
+        <h2>The GogoTraining Advantage</h2>
+        <div class="single-icon">
+            <div class="icon-bubble ei-bubble"></div>
+            <h3>Expert Instructors</h3>
+            <em>All GogoTraining instructors are experts in their field with
+            over 20 years' experience.  They all work in their field, write
+            courses, publish papers, write books and teach at major institutions
+            around the world. They are the real deal.</em>
+        </div>
+        <div class="single-icon">
+            <div class="icon-bubble clp-bubble"></div>
+            <h3>Career Paths</h3>
+            <em>GogoTraining believes you need a path that gets you from start
+            to finish and that's why we created the Career Path section of the
+            site. Click on any path and learn what it is all about and how to
+            become a technology master in that area.</em>
+        </div>
+        <div class="single-icon">
+            <div class="icon-bubble cc-bubble"></div>
+            <h3>Certified Courses</h3>
+            <em>GogoTraining is a Certified Training Provider in the areas of
+            ITIL, IT Service Management ISO/IEC 20000. COBIT 5, IT Asset
+            Management.  We hold certifications with AXELOS, APMG, EXIN and
+            IAITAM.</em>
+        </div>
+        <div class="single-icon">
+            <div class="icon-bubble ml-bubble"></div>
+            <h3>Mobile Learning</h3>
+            <em>Learn anywhere, anytime with GogoTraining.  No app required.
+            Just log in from any pc, tablet or mobile device and the right
+            stream will be sent to you.</em>
+        </div>
+    </div>
+    <div class="title-box">
+        <div class="title-box-column">
+            <p>GogoTraining provides classroom courses taught by top experts at
+            prices you can afford.  Don't settle for courses taught by amateurs.
+            Learn from the best.  Don't worry about taking time off of work to
+            learn. Now you can learn anytime/anywhere 24/7.  Don't take out a loan to get the
+            training you need.  Learn at a price point you can afford.</p>
+            <p>At GogoTraining we understand how important it is to take
+            courses that give you the skills you need, and all of our courses
+            do.</p>
+        </div>
+        <div class="title-box-column">
+            <p>At GogoTraining we understand how important it is to learn from
+            experts who know what they are doing, and all instructors have over
+            20 years of experience working and teaching in their field of
+            expertise.  At GogoTraining we know how important it is for you to
+            get all the materials you would receive if you were taking a live
+            instructor-led course, and all our courses have complete sets of
+            materials and lab guides.</p>
+            <p>With GogoTraining, <em>learn</em> with the best to <em>be</em> the best at a price you can afford.</p>
+        </div>
+    </div>
+</div>
+<!--
+<div class="main">
+    <div class="featured-set">
+        <div class="featured-item">
+            <div class="featured-item-header">
+                <div class="icon"></div>
+                <h4>Take A Course</h4>
+            </div>
+            <p>Learn with the Best Experts in the World</p>
+            <p>Don't waste your time with Amateurs.  All our classes are real classroom classes taught by the experts who created them.</p>
+            <div class="featured-selection">
+                <a class="featured-selection-header" href="/training/courses/">
+                    <strong>Hot Right Now:</strong>
+                    <span>Click to learn more</span>
+                </a>
+                <div class="featured-selections">
+                    <a class="mobileapp-link" href="#">
+                        <strong>Mobile Apps</strong>
+                        <span>Learn More</span>
+                    </a>
+                    <a class="itil-link" href="#">
+                        <strong>ITIL</strong>
+                        <span>Learn More</span>
+                    </a>
+                    <div class="clear"></div>
+                    <a class="oracle-link" href="#">
+                        <strong>Oracle</strong>
+                        <span>Learn More</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+<div class="featured-set-blog">
+    <div class="featured-set">
+        <div class="featured-set-intro">
+            Check out the latest from GogoTraining
+            <strong>Recent Blog Posts</strong>
+        </div>
+        <?php $posts = Blog::getLatestPosts(); ?>
+        <?php foreach($posts as $post): ?>
+            <div class="featured-item">
+                <div class="featured-item-header">
+                    <div class="icon"></div>
+                    <h4>
+                        <a href="<?= $post['guid'] ?>">
+                            <?= $post['post_title'] ?>
+                        </a>
+                    </h4>
+                    <div class="content">
+                        <?= Blog::contentPreview($post['post_content'], $post['guid']) ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<script type="text/javascript">
+</script>
+<?php include(GG_ROOT.'/includes/footer.php'); ?>

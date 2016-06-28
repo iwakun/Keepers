@@ -1,0 +1,358 @@
+<?php
+class Coupon extends GGObject {
+    public function __construct($id = false) {
+        global $db;
+        $this->db_table_name = 'coupons';
+        $this->db_id_field = 'CouponID';
+        if($id) {
+            $sql = "SELECT * FROM coupons WHERE CouponId = ?";
+            $data = $db->read($sql, array($id), GGDB::FETCH_ONE);
+            $this->db_id = $id;
+            $this->data = $data;
+        }
+    }
+    public function setData($data) {
+        if(!$this->db_id) {
+            if($this->checkIfExists($data['CouponCode'])) {
+                throw new Exception('Coupon with this code already exists');
+            }
+        }
+        $fields = array('CouponDescription', 'issued_to');
+        foreach($fields as $field) {
+            if(isset($data[$field])) {
+                $this->db_data[$field] = $data[$field];
+            }
+        }
+        $this->db_data['CouponCode'] = (!empty($data['random']) || $data['CouponCode'] == '') ?
+            $this->generateRandom($data['CouponCode']) :
+            $this->sanitizeCode($data['CouponCode']);
+        $this->db_data['CouponType'] = ($data['CouponType'] != '') ?
+            $data['CouponType'] : 'discount';
+        $this->db_data['CouponAmount'] = str_replace(array('$','%',' '), '', $data['CouponAmount']);
+        $this->db_data['CouponCategory'] = ($data['CouponCategory'] != '') ?
+            $data['CouponCategory'] : 'sign-up';
+        $this->db_data['CouponCategoryType'] = (!empty($data['types'])) ?
+            implode(',', $data['types']) : false;
+        if(
+            $this->db_data['CouponCategory'] == 'specific_course' &&
+            $data['CouponCategoryIDCourse'] != 0
+        ) {
+            $this->db_data['CouponCategoryID'] = $data['CouponCategoryIDCourse'];
+        }
+        if(
+            $this->db_data['CouponCategory'] == 'specific_package' &&
+            $data['CouponCategoryIDPackage'] != 0
+        ) {
+            $this->db_data['CouponCategoryID'] = $data['CouponCategoryIDPackage'];
+        }
+        if(
+            $this->db_data['CouponCategory'] == 'specific_bundle' &&
+            $data['CouponCategoryIDBundle'] != 0
+        ) {
+            $this->db_data['CouponCategoryID'] = $data['CouponCategoryIDBundle'];
+        }
+        $this->db_data['excluded_courses'] = (!empty($data['excluded_courses'])) ?
+            json_encode($data['excluded_courses']) : '';
+        if(!empty($data['expiration_date'])) {
+            $this->db_data['expiration_date'] = date('Y-m-d', strtotime($data['expiration_date']));
+        } else {
+            $this->db_data['expiration_date'] = '';
+        }
+        $this->db_data['site'] = GG_SITE;
+        $this->db_data['isOnetime'] = (!empty($data['isOnetime'])) ? 1 : 0;
+        if(isset($data['status']) && $data['status'] === '0') {
+            $this->db_data['status'] = 0;
+        } else {
+            $this->db_data['status'] = 1;
+        }
+        if(!empty($data['modify-expiration'])) {
+            $days = intval($data['modify-expiration']);
+            $modify_data = array(
+                'expiration' => array(
+                    'duration' => $days,
+                    'success' => "Your item has been modified and will now have an expiration date of $days days"
+                )
+            );
+            if($this->db_id) $modify_data = $this->mergeModifyItem($modify_data);
+            $this->db_data['CouponModifyItem'] = json_encode($modify_data);
+        }
+        if(!$this->db_id) {
+            $this->db_data['date'] = date('Y-m-d', strtotime('now'));
+        }
+        return true;
+    }
+
+    public function getByCode($code) {
+        global $db;
+        $code = strtoupper($code);
+        $code = str_replace(' ','', $code);
+        $sql = "SELECT * FROM `coupons` WHERE `CouponCode` = ? AND status = '1' AND site = ?";
+        $data = $db->read($sql, array($code, GG_SITE), GGDB::FETCH_ONE);
+        if(!$data) {
+            return false;
+        } else {
+            $this->data = $data;
+            return true;
+        }
+    }
+    private function calculate($cost) {
+        $new_amount = $cost;
+        switch($this->CouponType) {
+        case 'percent off':
+            $new_amount =
+                $cost - ($cost * ($this->CouponAmount / 100));
+            break;
+        case 'flat cost':
+            $new_amount = $this->CouponAmount;
+            break;
+        default: // Discount
+            $new_amount = $cost - $this->CouponAmount;
+            break;
+        }
+        if($new_amount < 0) $new_amount = 0;
+        return $new_amount;
+    }
+    public function checkOneItem($code, $item) {
+        if(!$this->getByCode($code)) return false;
+        if(!$this->checkItem($item)) return false;
+        if($this->checkIfExpired()) return false;
+        $new_amount = $this->calculate($item->getCost());
+        if($new_amount == $item->getCost()) return false;
+        return $new_amount;
+    }
+    public function checkEntireCart($code) {
+        if(!$this->getByCode($code))
+            return array('status' => 0, 'msg' => 'Invalid coupon');
+        if($this->checkIfExpired()) {
+            return array('status' => 0, 'msg' => 'Coupon expired');
+        }
+        global $user;
+        // Loop through cart and check against each item.
+        $cart_items = $user->getCart()->getItems();
+
+        $appropriate_items = array();
+        foreach($cart_items as $key => $item) {
+            if(!isset($item['coupon'])) {
+                $new_amount = $this->checkOneItem($code, $item['item']);
+                if($new_amount !== False && $new_amount < $item['item']->getFinalCost()) {
+                    $appropriate_items[] = array(
+                        'id' => $item['id'],
+                        'new_amount' => $new_amount,
+                        'difference' => $item['item']->getFinalCost() - $new_amount
+                    );
+                }
+            }
+        }
+        $return_values = array();
+        if(!empty($appropriate_items)) {
+            if($this->isOnetime == '1') {
+                $best_appropriate_item = false;
+                foreach($appropriate_items as $appropriate_item) {
+                    if(!$best_appropriate_item) {
+                        $best_appropriate_item = $appropriate_item;
+                        continue;
+                    }
+                    if($best_appropriate_item['difference'] < $appropriate_item['difference']) {
+                        $best_appropriate_item = $appropriate_item;
+                    }
+                }
+                $return_values[] = array(
+                    'item_id' => $best_appropriate_item['id'],
+                    'new_amount' => $best_appropriate_item['new_amount']
+                );
+            } else {
+                foreach($appropriate_items as $appropriate_item) {
+                    $return_values[] = array(
+                        'item_id' => $appropriate_item['id'],
+                        'new_amount' => $appropriate_item['new_amount']
+                    );
+                }
+            }
+        }
+
+        $success_msg = array();
+        $modify_data = $this->getModifyItem();
+        if(!empty($modify_data)) {
+            foreach($modify_data as $key => $modifier) {
+                $success_msg[$key] = $modifier['success'];
+            }
+        }
+
+        if(empty($return_values))
+            return array('status' => '0', 'msg' => 'Coupon did not apply to any items');
+        else
+            $msg = 'Coupon Valid';
+        if(!empty($success_msg)) {
+            $msg = '';
+            foreach($success_msg as $sm) {
+                $msg .= $sm.' ';
+            }
+        }
+        return array('status' => '1', 'msg' => $msg, 'data' => $return_values);
+    }
+
+    public function getAssociatedItem() {
+        if($this->CouponCategory == 'specific_course') {
+            return Item::factory('course|'.$this->CouponCategoryID.':'.$this->CouponCategoryType);
+        } else if($this->CouponCategory == 'specific_package') {
+            return Item::factory('package|'.$this->CouponCategoryID);
+        } else if($this->CouponCategory == 'specific_bundle') {
+            return Item::factory('bundle|'.$this->CouponCategoryID);
+        } else {
+            throw new Exception('No specific course or package associated with that coupon');
+            return false;
+        }
+    }
+
+    public function makesItemFree() {
+        try {
+            $item = $this->getAssociatedItem();
+        } catch (Exception $e) {
+            throw $e;
+        }
+        $amount = $this->calculate($item->getCost());
+        if($amount <= 0) return true;
+        else return false;
+    }
+
+    public function checkItem($item) {
+        $type = $item->getType();
+        $id = $item->getId();
+        if($this->CouponCategory == 'anything') return true;
+        if($this->CouponCategory == 'course' && $type == 'course') {
+            return $this->checkCategoryType($item) && $this->itemNotExcluded($item);
+        }
+        if(
+            $this->CouponCategory == 'specific_course' &&
+            $type == 'course' &&
+            $this->CouponCategoryID == $id
+        ) {
+            return $this->checkCategoryType($item);
+        }
+        if(
+            $this->CouponCategory == 'specific_package' &&
+            $type == 'package' &&
+            $this->CouponCategoryID == $id
+        ) {
+            return true;
+        }
+        if($this->CouponCategory == 'gopass' && $type == 'gopass') {
+            return $this->checkCategoryType();
+        }
+        if(
+            $this->CouponCategory == 'specific_bundle' &&
+            $type == 'bundle' &&
+            $this->CouponCategoryID == $id
+        ) {
+            return true;
+        }
+        if($this->CouponCategory == $type) return true;
+        return false;
+    }
+
+    public function checkCategoryType($item) {
+        $purchase_option_data = $item->getPurchaseOptionData();
+        return in_array($purchase_option_data['id'], $this->getCategoryTypes());
+    }
+
+    public function checkIfExpired() {
+        if($this->expiration_date) {
+            if(
+                date('Y-m-d', strtotime($this->expiration_date)) <
+                date('Y-m-d', strtotime('now'))
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function itemNotExcluded($item) {
+        if($item->getType() == 'course') {
+            $excluded_courses = $this->getExcludedCourses();
+            if($excluded_courses && in_array($item->getId(), $excluded_courses)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function useCoupon($coupon_code) {
+        if(!$this->getByCode($coupon_code))
+            return false;
+
+        global $db;
+        if($this->isOnetime == '1') {
+            $sql = "UPDATE coupons SET status = '0' WHERE `CouponCode` = ? AND status = '1' AND site = ?";
+            $db->write($sql, array($this->CouponCode, GG_SITE));
+        }
+        $sql = "UPDATE coupons SET uses = uses + 1 WHERE CouponCode = ? AND site = ?";
+        if($db->write($sql, array($this->CouponCode, GG_SITE))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getCategoryTypes() {
+        return explode(',', $this->CouponCategoryType);
+    }
+
+    public function getModifyItem() {
+        return json_decode($this->CouponModifyItem, true);
+    }
+    public function mergeModifyItem($new_data) {
+        global $db;
+        $old_data = $this->getModifyItem();
+        if($old_data) {
+            $merged_data = array_merge($old_data, $new_data);
+            return array_merge($old_data, $new_data);
+        } else {
+            return $new_data;
+        }
+    }
+
+    public function getExcludedCourses() {
+        if($this->excluded_courses) {
+            $info = json_decode($this->excluded_courses);
+            return $info;
+        } else {
+            return false;
+        }
+    }
+    public function setExcludedCoruses($courses_array) {
+        $json = json_encode(array('excluded_courses' => $courses_array));
+        $this->excluded_courses = $json;
+        return $json;
+    }
+
+    public function generateRandom($prefix = false, $length = 5) {
+        do {
+            $chars = "abcdefghjkmnopqrstuvwxyz023456789";
+            srand((double)microtime()*1000000);
+            $i = 0;
+            $code = '' ;
+            while ($i <= $length) {
+                $num = rand() % 33;
+                $tmp = substr($chars, $num, 1);
+                $code = $code . $tmp;
+                $i++;
+            }
+            if($prefix) $code = $prefix.$code;
+            // Make sure there aren't any duplicates
+            $passcheck = $this->checkIfExists($code);
+        } while ($passcheck != '');
+        return $this->sanitizeCode($code);
+    }
+    public function checkIfExists($code) {
+        global $db;
+        $code = $this->sanitizeCode($code);
+        $sql = "SELECT `CouponCode` FROM `coupons` WHERE `CouponCode` = '$code'";
+        return $db->read($sql, array($code), GGDB::FETCH_SCALER);
+    }
+    public function sanitizeCode($code) {
+        $code = str_replace(' ', '', $code);
+        $code = strtoupper($code);
+        return $code;
+    }
+}

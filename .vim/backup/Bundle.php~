@@ -1,0 +1,40 @@
+<?php
+class Item_Bundle extends Item {
+    protected $course_num;
+
+    protected function getItemFromDB() {
+        parent::getItemFromDB();
+        $info = json_decode($this->item_data['info']);
+        if(isset($info->course_num)) {
+            $this->course_num = $info->course_num;
+        } else {
+            $this->course_num = 1;
+        }
+        return $this;
+    }
+
+    public function savePurchaseData() {
+        global $db;
+        $this->addPurchaseData('status', '1');
+        $purchase_id = parent::savePurchaseData();
+
+        // Add vouchers to user account
+        $sql = "UPDATE user SET FreeCourses = FreeCourses + ?
+                WHERE UserID = ?";
+        $result = $db->write($sql, array($this->course_num, $this->userid));
+        if(!$result) {
+            throw new Exception('Unable to set vouchers for user');
+        }
+        return $purchase_id;
+    }
+
+    public function getSuccessMessage() {
+        $msg = "You now have {$this->course_num} new course voucher";
+        if($this->course_num != 1) $msg .= 's';
+        return $msg;
+    }
+
+    public function getVoucherNum() {
+        return $this->course_num;
+    }
+}

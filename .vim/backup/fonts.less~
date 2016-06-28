@@ -1,0 +1,44 @@
+@font-face {
+    font-family: 'TradeGothic';
+    src: url('/fonts/TradeGothic.eot');
+    src: url('/fonts/TradeGothic.woff2') format('woff2'),
+         url('/fonts/TradeGothic.woff') format('woff'),
+         url('/fonts/TradeGothic.ttf') format('truetype'),
+         url('/fonts/TradeGothic.svg#TradeGothic') format('svg'),
+         url('/fonts/TradeGothic.eot?#iefix') format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TradeGothic';
+    src: url('/fonts/TradeGothic-BoldTwo.eot');
+    src: url('/fonts/TradeGothic-BoldTwo.woff2') format('woff2'),
+         url('/fonts/TradeGothic-BoldTwo.woff') format('woff'),
+         url('/fonts/TradeGothic-BoldTwo.ttf') format('truetype'),
+         url('/fonts/TradeGothic-BoldTwo.svg#TradeGothic-BoldTwo') format('svg'),
+         url('/fonts/TradeGothic-BoldTwo.eot?#iefix') format('embedded-opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TradeGothic';
+    src: url('/fonts/TradeGothic-Light.eot');
+    src: url('/fonts/TradeGothic-Light.woff2') format('woff2'),
+         url('/fonts/TradeGothic-Light.woff') format('woff'),
+         url('/fonts/TradeGothic-Light.ttf') format('truetype'),
+         url('/fonts/TradeGothic-Light.svg#TradeGothic-Light') format('svg'),
+         url('/fonts/TradeGothic-Light.eot?#iefix') format('embedded-opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TradeGothic-Condensed';
+    src: url('/fonts/TradeGothic-BoldCondTwenty.eot');
+    src: url('/fonts/TradeGothic-BoldCondTwenty.woff2') format('woff2'),
+         url('/fonts/TradeGothic-BoldCondTwenty.woff') format('woff'),
+         url('/fonts/TradeGothic-BoldCondTwenty.ttf') format('truetype'),
+         url('/fonts/TradeGothic-BoldCondTwenty.svg#TradeGothic-BoldCondTwenty') format('svg'),
+         url('/fonts/TradeGothic-BoldCondTwenty.eot?#iefix') format('embedded-opentype');
+    font-weight: bold;
+    font-style: normal;
+}

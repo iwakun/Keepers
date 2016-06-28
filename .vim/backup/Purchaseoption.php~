@@ -1,0 +1,105 @@
+<?php
+class Purchaseoption extends GGObject {
+	public function __construct($id = false) {
+		$this->db_table_name = 'purchase_options';
+		parent::__construct($id);
+	}
+	public function getName() {
+		return $this->name;
+	}
+	public function getOptionByItemId($id) {
+		global $db;
+		/*
+		 * Check to see if there are any modifications for this specific
+		 * item. Modifications are alterations to specific items. This allows
+		 * courses to have thier own price, or fallback to the default price.
+		 */
+		$sql = "SELECT * FROM purchase_options_modifications WHERE purchase_option = ? AND item_id = ?";
+		$option = $db->read($sql, array($this->id, $id), GGDB::FETCH_ONE);
+		$option_data = array(
+			'status' => 1,
+			'id' => $this->id,
+			'mod_id' => '',
+			'name' => $this->getName(),
+			'course_type' => $this->course_type,
+			'default_price' => $this->default_price,
+			'price' => $this->default_price,
+			'default_expiration_length' => $this->expiration_length,
+			'expiration_length' => $this->expiration_length,
+			'is_subscription' => $this->is_subscription
+		);
+		if($option) {
+			$option_data['mod_id'] = $option['id'];
+			if($option['status'] != NULL) 
+				$option_data['status'] = $option['status'];
+			if($option['price'] != NULL) 
+				$option_data['price'] = $option['price'];
+			if($option['expiration_length'] != NULL) 
+				$option_data['expiration_length'] = $option['expiration_length'];
+		}
+		return $option_data;
+	}
+	public function saveModification($data) {
+		global $db;
+		if($data['expiration_length'] === '' || $data['expiration_length'] == $this->expiration_length)
+			$data['expiration_length'] = NULL;
+		if($data['price'] === '' || $data['price'] == $this->default_price)
+			$data['price'] = NULL;
+		$data['status'] = ($data['status'] === 0) ? 0 : NULL;
+		if($data['mod_id'] != '') {
+			if($data['price'] === NULL && $data['expiration_length'] === NULL && $data['status'] === NULL) {
+				$sql = "DELETE FROM purchase_options_modifications WHERE id = ?";
+				$db->write($sql, array($data['mod_id']));
+			} else {
+				$sql = "UPDATE purchase_options_modifications 
+						SET expiration_length = ?, price = ?, status = ? WHERE id = ?";
+				$db->write($sql, array(
+					$data['expiration_length'],
+					$data['price'], 
+					$data['status'], 
+					$data['mod_id'])
+				);
+			}
+		} else {
+			if($data['price'] === NULL && $data['expiration_length'] === NULL && $data['status'] === NULL) {
+				// Do nothing
+			} else {
+				$sql = "INSERT INTO purchase_options_modifications 
+						(purchase_option, item_id, status, price, expiration_length)
+						VALUES (?, ?, ?, ?, ?)";
+				$db->write($sql, array(
+					$this->id,
+					$data['item_id'],
+					$data['status'],
+					$data['price'],
+					$data['expiration_length']
+				));
+			}
+		}
+	}
+	public function checkCourseType($types_to_check) {
+		if(in_array($this->course_type, $types_to_check)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function getAllPurchaseOptions($type) {
+		global $db;
+		if(!in_array($type, array('library', 'gopass', 'course'))) {
+			throw new Exception('Class has no purchase options');
+		}
+		$sql = "SELECT id FROM purchase_options WHERE item_type = ? ORDER BY `order`";
+		$purchase_options_ids = $db->read($sql, array($type));
+		$purchase_options = array();
+		foreach($purchase_options_ids as $id) {
+			$purchase_options[] = new Purchaseoption($id['id']);
+		}
+		return $purchase_options;
+	}
+	
+	public static function priceFormat($price) {
+		return money_format('$%n', $price);
+	}
+}

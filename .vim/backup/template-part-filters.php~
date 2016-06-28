@@ -1,0 +1,61 @@
+<div data-component="tax-filter">
+	<div class="taxo-filters-desktop" data-tf="desktop">
+		<ul class="taxo-filter">
+			<li>FILTER BY:</li>
+			<li class="blue" data-tf-target="location">Location</li>
+			<li class="blue" data-tf-target="materials">Materials</li>
+			<li class="blue" data-tf-target="style">Style</li>
+			<li class="blue" data-tf-target="size">Size</li>
+		</ul>
+		<div class="taxo-lists" data-tf="tax-container">
+			<ul class="location" data-tf-tax="location">
+				<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'location', 'hide_empty' => false)); ?>
+			</ul>
+			<ul class="materials" data-tf-tax="materials">
+				<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'material', 'hide_empty' => false)); ?>
+			</ul>
+			<ul class="style" data-tf-tax="style">
+				<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'style', 'hide_empty' => false)); ?>
+			</ul>
+			<ul class="size" data-tf-tax="size">
+				<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'size', 'hide_empty' => false)); ?>
+			</ul>
+			<div class="controls">
+				<button class="prev" data-tf="left"></button>
+				<button class="next" data-tf="right"></button>
+				<button class="exit" data-tf="close"></button>
+			</div>
+		</div>
+	</div>
+	<ul class="taxo-filters-mobile" data-tf="mobile" data-components="quiccordion">
+		<li>
+			<a>Filter Projects</a>
+			<ul>
+				<li>
+					<a>Location</a>
+					<ul>
+						<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'location', 'hide_empty' => false)); ?>
+					</ul>
+				</li>
+				<li>
+					<a>Materials</a>
+					<ul>
+						<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'material', 'hide_empty' => false)); ?>
+					</ul>
+				</li>
+				<li>
+					<a>Style</a>
+					<ul>
+						<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'style', 'hide_empty' => false)); ?>
+					</ul>
+				</li>
+				<li>
+					<a>Size</a>
+					<ul>
+						<?php wp_list_categories(array('title_li' => '', 'taxonomy' => 'size', 'hide_empty' => false)); ?>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+</div>

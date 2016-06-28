@@ -1,0 +1,388 @@
+<?php
+require_once('includes/boot.inc.php');
+require_once(GG_ROOT.'/admin/admin_header.php');
+
+$id = (!empty($_GET['id'])) ? intval($_GET['id']) : false;
+
+$coupon = new Coupon($id);
+$courses = Course::getAllCourses();
+
+$sql = "SELECT * FROM pricing WHERE name = 'package' ORDER BY id";
+$packages = $db->read($sql);
+
+$courses = Course::getAdminCourses();
+
+$expiration_date = ($coupon->expiration_date) ? date('m/d/Y', strtotime($coupon->expiration_date)) : '';
+$form = new Form(array(
+    'CouponCode' => $coupon->CouponCode,
+    'CouponType' => $coupon->CouponType,
+    'CouponCategory' => $coupon->CouponCategory,
+    'CouponAmount' => $coupon->CouponAmount,
+    'CouponDescription' => $coupon->CouponDescription,
+	'CouponCategoryID' => $coupon->CouponCategoryID,
+	'CouponCategoryTypes' => $coupon->getCategoryTypes(),
+	'excluded_courses' => $coupon->getExcludedCourses(),
+	'expiration_date' => $expiration_date,
+    'isOnetime' => $coupon->isOnetime,
+    'status' => $coupon->status,
+    'issued_to' => $coupon->issued_to
+));
+$modify_item = $coupon->getModifyItem();
+if(isset($modify_item['expiration'])) {
+	$form->setValue('modify-expiration', $modify_item['expiration']['duration']);
+}
+$form->setAction(($id) ? "/admin/coupons/form_process.php?id=$id" : "/admin/coupons/form_process.php");
+$p->addScript('/js/lib/jquery.tmpl.min.js');
+$p->addScript('/js/lib/jquery-ui.js');
+$p->addScript('/js/admin.js');
+$p->addCss('/css/lib/jquery-ui/jquery-ui.css');
+$p->addOnDocReady("$('.form-datepicker').datepicker();");
+?>
+<?php include(GG_ROOT.'/includes/header.php'); ?>
+<div class="main">
+    <h1>Coupon Codes</h1>
+    <form
+        id="admin-coupon-add"
+        action="<?php echo $form->getAction() ?>"
+        method="post"
+        class="form jValidate">
+        <fieldset>
+            <legend>
+                <?php if($id): ?>
+                    Edit Coupon Code
+                <?php else: ?>
+                    Add a New Coupon Code
+                <?php endif; ?>
+            </legend>
+            <label>Coupon Code</label>
+            <input
+                type="text"
+                class="text"
+                name="CouponCode"
+                value="<?php echo $form->getValue('CouponCode') ?>" />
+
+            <?php if(!$id): ?>
+                <label class="checkbox">
+                    <input type="checkbox" name="random" value="1" data-target="num-coupons" />
+					Check here to autogenerate coupons
+                </label>
+				<div data-container="num-coupons" style="display: none;">
+					<label style="display: inline;">Number of Coupons to Create</label>
+					<input
+						style="display: inline; width: 50px;"
+						type="text"
+						class="text"
+						name="number_of_coupons"
+						value="<?php echo $form->getValue('number_of_coupons') || 1 ?>" />
+				</div>
+            <?php endif; ?>
+			<br />
+
+            <label>Coupon Type <span class="required">*</span></label>
+            <select name="CouponType" class="validate">
+                <option value="--">-- Please choose --</option>
+                <option
+                    <?php if($form->getValue('CouponType') == 'discount'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    discount
+                </option>
+                <option
+                    <?php if($form->getValue('CouponType') == 'percent off'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    percent off
+                </option>
+                <option
+                    <?php if($form->getValue('CouponType') == 'flat cost'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    flat cost
+                </option>
+            </select>
+
+            <label>Amount <span class="required">*</span></label>
+            <input 
+                type="text"
+                class="text validate"
+                name="CouponAmount"
+                value="<?php echo $form->getValue('CouponAmount') ?>" />
+
+			<label>
+				Coupon Expiration Date 
+				<small>(leave blank for no expiration date)</small>
+			</label>
+			<input
+				type="text"
+				class="text form-datepicker"
+				name="expiration_date"
+				value="<?php echo $form->getValue('expiration_date'); ?>" />
+            
+
+            <label>Coupon Category <span class="required">*</span></label>
+            <select name="CouponCategory" class="validate">
+                <option value="--">-- Please choose--</option>
+                <option 
+                    value="gopass"
+                    <?php if($form->getValue('CouponCategory') == 'gopass'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing a GoPass
+                </option>
+                <option 
+                    value="bundle"
+                    <?php if($form->getValue('CouponCategory') == 'bundle'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing any bundle (a set of free courses)
+                </option>
+                <option 
+                    value="package"
+                    <?php if($form->getValue('CouponCategory') == 'package'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing any package (a set of specific courses)
+                </option>
+                <option 
+                    value="specific_package"
+                    <?php if($form->getValue('CouponCategory') == 'specific_package'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing a specific package
+                </option>
+                <option 
+                    value="specific_bundle"
+                    <?php if($form->getValue('CouponCategory') == 'specific_bundle'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing a specific bundle
+                </option>
+                <option 
+                    value="course"
+                    <?php if($form->getValue('CouponCategory') == 'course'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing any course
+                </option>
+                <option 
+                    value="specific_course"
+                    <?php if($form->getValue('CouponCategory') == 'specific_course'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing a specific course (choose below)
+                </option>
+                <option
+                    value="materials"
+                    <?php if($form->getValue('CouponCategory') == 'materials'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing any set of course materials
+                </option>
+                <option
+                    value="anything"
+                    <?php if($form->getValue('CouponCategory') == 'anything'): ?>
+                        selected="selected"
+                    <?php endif; ?>>
+                    Purchasing anything
+                </option>
+            </select>
+			<select 
+				id="list-courses"
+				<?php if($form->getValue('CouponCategory') != 'specific_course'): ?>
+					style="display: none;"
+				<?php endif; ?>
+				name="CouponCategoryIDCourse">
+                <option value="0">-- Please choose--</option>
+				<?php foreach($courses as $course): ?>
+					<option
+						value="<?php echo $course->id ?>"
+						<?php if($form->getValue('CouponCategoryID') == $course->id): ?>
+							selected="selected"
+						<?php endif; ?>>
+						<?php echo $course->getTitle().$course->getStatusText(); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<select 
+				id="list-packages"
+				<?php if($form->getValue('CouponCategory') != 'specific_package'): ?>
+					style="display: none;"
+				<?php endif; ?>
+				name="CouponCategoryIDPackage">
+                <option value="0">-- Please choose--</option>
+				<?php foreach($packages as $package): ?>
+					<option
+						value="<?php echo $package['id']; ?>"
+						<?php if($form->getValue('CouponCategoryID') == $package['id']): ?>
+							selected="selected"
+						<?php endif; ?>>
+						<strong>PACKAGE-<?php echo $package['id']; ?>: </strong>
+						<?php echo $package['label']; ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<select 
+				id="list-bundles"
+				<?php if($form->getValue('CouponCategory') != 'specific_bundle'): ?>
+					style="display: none;"
+				<?php endif; ?>
+				name="CouponCategoryIDPackage">
+                <option value="0">-- Please choose--</option>
+				<?php foreach($bundles as $bundle): ?>
+					<option
+						value="<?php echo $bundle['id']; ?>"
+						<?php if($form->getValue('CouponCategoryID') == $bundle['id']): ?>
+							selected="selected"
+						<?php endif; ?>>
+						<strong>BUNDLE-<?php echo $bundle['id']; ?>: </strong>
+						<?php echo $bundle['label']; ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+			<fieldset
+				<?php if(
+					$form->getValue('CouponCategory') != 'specific_course' && 
+					$form->getValue('CouponCategory') != 'course'
+				): ?>
+					style="display: none;"
+				<?php endif; ?>
+				id="coupon-purchase-options-course">
+				<legend>Purchase Options</legend>
+				<?php $purchase_options = Purchaseoption::getAllPurchaseOptions('course'); ?>
+				<?php foreach($purchase_options as $option): ?>
+					<label class="checkbox">
+						<input
+							type="checkbox"
+							name="types[]"
+							value="<?php echo $option->id; ?>"
+							<?php if(in_array($option->id, $form->getValue('CouponCategoryTypes'))): ?>
+								checked="checked"
+							<?php endif; ?> />
+						<?php echo $option->getName(); ?>
+					</label>
+				<?php endforeach; ?>
+			</fieldset>
+			<fieldset
+				<?php if($form->getValue('CouponCategory') != 'gopass'): ?>
+					style="display: none;"
+				<?php endif; ?>
+				id="coupon-purchase-options-gopass">
+				<legend>Purchase Options</legend>
+				<?php $purchase_options = Purchaseoption::getAllPurchaseOptions('gopass'); ?>
+				<?php foreach($purchase_options as $option): ?>
+					<label class="checkbox">
+						<input
+							type="checkbox"
+							name="types[]"
+							value="<?php echo $option->id; ?>"
+							<?php if(in_array($option->id, $form->getValue('CouponCategoryTypes'))): ?>
+								checked="checked"
+							<?php endif; ?> />
+						<?php echo $option->getName(); ?>
+					</label>
+				<?php endforeach; ?>
+			</fieldset>
+
+
+            <label>Description</label>
+            <textarea name="CouponDescription"><?php echo $form->getValue('CouponDescription') ?></textarea>
+
+            <label>Issued to</label>
+            <input 
+                type="text"
+                class="text"
+                name="issued_to"
+                value="<?php echo $form->getValue('issued_to') ?>" />
+
+            <label class="checkbox">
+                <input
+                    type="checkbox"
+                    name="isOnetime"
+                    value="1"
+                    <?php if($form->getValue('isOnetime') == '1'): ?>
+                        checked="checked"
+                    <?php endif; ?> />
+                Check here if this is a one-time use only coupon (one time ever, not one time per user)
+            </label>
+
+            <label class="checkbox">
+                <input
+                    type="checkbox"
+                    name="status"
+                    value="1"
+                    <?php if($form->getValue('status') == '1' || !$id): ?>
+                        checked="checked"
+                    <?php endif; ?> />
+                Check here if this coupon is active
+            </label>
+			<fieldset>
+				<legend>Modify Item</legend>
+				<p>Use this section to modify the item that the coupon will be applied to.</p>
+				<label>
+					Set Expiration Date for Item (number of days: e.g., 30, 60, 365)
+					<br />
+					<strong>
+						NOTE: This sets an expiration date for the ITEM, not the coupon itself.
+					</strong>
+				</label>
+				<input
+					type="text" 
+					class="text"
+					<?php if($form->getValue('modify-expiration')): ?>
+						value="<?php echo $form->getValue('modify-expiration'); ?>"
+					<?php endif; ?>
+					name="modify-expiration" />
+			</fieldset>
+			<fieldset class="excluded-courses">
+				<legend>Excluded Courses</legend>
+				<p>
+					Use this section to add courses that this coupon
+					<strong>cannot</strong> be used on.
+				</p>
+				<?php if($form->getValue('excluded_courses')): ?>
+					<?php foreach($form->getValue('excluded_courses') as $excluded): ?>
+						<select 
+							name="excluded_courses[]">
+							<?php foreach($courses as $course): ?>
+								<option 
+									<?php if($excluded == $course->id): ?>
+										selected="selected"
+									<?php endif; ?>
+									value="<?php echo $course->id; ?>">
+									<?php echo $course->title; ?><?php echo $course->getStatusText(); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					<?php endforeach; ?>
+				<?php endif; ?>
+				<button 
+					class="button-secondary-small"
+					data-action="admin-coupon-add-course">
+					Add course
+				</button>
+			</fieldset>
+
+            <div class="clear"></div>
+            <button class="button button-secondary-small" type="submit">
+                Submit
+            </button>
+            <div class="notice"></div>
+        </fieldset>
+    </form>
+</div>
+<?php include(GG_ROOT.'/includes/footer.php'); ?>
+<script type="javascript/template" id="admin-coupon-courses">
+<?php // Has to be included in the template to access PHP variable $courses ?>
+<div class="excluded-course">
+	<select name="excluded_courses[]">
+		<?php foreach($courses as $course): ?>
+			<option value="<?php echo $course->id ?>">
+				<?php echo $course->title.$course->getStatusText(); ?>
+			</option>
+		<?php endforeach; ?>
+	</select>
+	<button class="button-secondary-small" data-action="admin-coupon-remove-course">
+		&times;
+	</button>
+</div>
+</script>

@@ -1,0 +1,459 @@
+var app = angular.module('rateApp', ['ngDropdowns', 'rzModule']);
+
+app.controller('RateAppController', ['$scope', '$location', '$timeout',
+    function($scope, $location, $timeout) {
+        $scope.selectedOption = { text: 'Hint Text' };
+        $scope.loadComplete = false;
+        $scope.loadCompleteFinal = false;
+        $scope.currentPage = 'home';
+        $scope.switch = function() {
+            $scope.currentPage = 'loading';
+            $timeout(function() {
+                $scope.currentPage = 'rate';
+                var loanType = sortDataIntoGroups(data);
+                console.log(loanType);
+                /*
+                $scope.loanTypes = sortDataIntoGroups(data);
+                console.log($scope.loanTypes);
+                var firstLoan = Object.keys($scope.loanTypes)[0];
+                $scope.currentLoanType = $scope.loanTypes[firstLoan];
+                $scope.currentLoanOption = $scope.loanTypes[firstLoan].options[0];
+                $timeout(function() {
+                    $scope.loadComplete = true;
+                    $timeout(function() {
+                        $scope.loadCompleteFinal = true;
+                        $scope.setSliders();
+                    }, 1100);
+                });
+                */
+            }, 2000);
+        };
+        $scope.setSliders = function() {
+            $scope.sliders = {
+                rate: {
+                    value: $scope.currentLoanOption.Rate,
+                    options: {
+                        stepsArray: $scope.currentLoanType.rates,
+                        showTicks: true,
+                        hidePointerLabels: true,
+                        hideLimitLabels: true
+                    },
+                },
+                payment: {
+                    value: $scope.currentLoanOption.Payments[0].Amount,
+                    options: {
+                        stepsArray: $scope.currentLoanType.payments,
+                        showTicks: true,
+                        hidePointerLabels: true,
+                        hideLimitLabels: true
+                    },
+                },
+                total: {
+                    value: $scope.currentLoanOption.Price,
+                    options: {
+                        stepsArray: $scope.currentLoanType.totals,
+                        showTicks: true,
+                        hidePointerLabels: true,
+                        hideLimitLabels: true
+                    },
+                }
+            };
+            $timeout(function() {
+                $scope.$broadcast('rzSliderForceRender');
+            });
+        };
+        $scope.slider = {
+            value: 3,
+            options: {
+                floor: 1,
+                ceil: 5,
+                showTicks: true,
+                hidePointerLabels: true,
+                hideLimitLabels: true
+            }
+        };
+        $scope.tabs = [
+            {
+                length: '15',
+                type: 'Yr Fixed',
+                data: {
+                    payment: '$1,000.00',
+                    rate: '3.5%',
+                    total: '$200,000'
+                }
+            },
+            {
+                length: '20',
+                type: 'Yr Fixed',
+                data: {
+                    payment: '$2,000.00',
+                    rate: '3.5%',
+                    total: '$400,000'
+                }
+            },
+            {
+                length: '30',
+                type: 'Yr Fixed',
+                data: {
+                    payment: '$3,000.00',
+                    rate: '3.5%',
+                    total: '$600,000'
+                }
+            },
+            {
+                length: '5/1',
+                type: 'ARM',
+                data: {
+                    payment: '$4,000.00',
+                    rate: '3.5%',
+                    total: '$800,000'
+                }
+            },
+            {
+                length: '3/1',
+                type: 'ARM',
+                data: {
+                    payment: '$5,000.00',
+                    rate: '3.5%',
+                    total: '$1,000,000'
+                }
+            },
+        ];
+        $scope.currentTab = $scope.tabs[0];
+        $scope.tabSwitch = function(tab) {
+            $scope.currentTab = tab;
+        };
+    }
+]);
+
+var data = [
+    {
+        "Apr": 2.92,
+        "Fees":  [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee"},
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0,  "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments":  [{ "Amount": 1652.3 }],
+        "Price": 97.625,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.375,
+        "TotalClosingCost": 10952.0
+    }, {
+        "Apr": 3.591,
+        "Fees":  [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1105.24 }],
+        "Price": 98.750,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.375,
+        "TotalClosingCost": 8139.0
+    }, {
+        "Apr": 3.537,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1417.99 }],
+        "Price": 98.875,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.25,
+        "TotalClosingCost": 7826.0
+    }, {
+        "Apr": 2.827,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1666.97 }],
+        "Price": 99.125,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.5,
+        "TotalClosingCost": 7202.0
+    }, {
+        "Apr": 3.634,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1122.61 }],
+        "Price": 99.750,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.5,
+        "TotalClosingCost": 5639.0
+    }, {
+        "Apr": 3.548,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1433.89 }],
+        "Price": 99.875,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.375,
+        "TotalClosingCost": 5326.0
+    }, {
+        "Apr": 3.739,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1140.13 }],
+        "Price": 100.000,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.625,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.659,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1449.9 }],
+        "Price": 100.000,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.5,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 2.825,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1681.72 }],
+        "Price": 100.000,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.625,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 2.951,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1696.55 }],
+        "Price": 100.375,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.75,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.865,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1157.79 }],
+        "Price": 100.750,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.75,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.077,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1711.46 }],
+        "Price": 100.750,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.875,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.785,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1466.01 }],
+        "Price": 100.875,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.625,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.991,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1175.59 }],
+        "Price": 101.000,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.875,
+        "TotalClosingCost": 5014.0
+    }, {
+        "Apr": 3.911,
+        "Fees": [
+            { "Amount": 440.0, "Name": "Appraisal Fee" },
+            { "Amount": 25.0, "Name": "Credit Report Fee" },
+            { "Amount": 2500.0, "Name": "Loan Origination Fee" },
+            { "Amount": 85.0, "Name": "Recording Fee" },
+            { "Amount": 650.0, "Name": "Processing Fee" },
+            { "Amount": 340.0, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85.0, "Name": "Title Endorsment Fee" },
+            { "Amount": 889.0, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 644651660,
+        "LockPeriod": 55,
+        "Payments": [{ "Amount": 1482.22 }],
+        "Price": 101.125,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.75,
+        "TotalClosingCost": 5014.0
+    }
+];
+
+function sortDataIntoGroups(data) {
+    var sortedData = [];
+    for(var i = 0; i < data.length; i++) {
+        if(typeof sortedData[data[i].ProductIndex] === 'undefined') {
+            sortedData[data[i].ProductIndex] = {
+                rates: [],
+                payments: [],
+                totals: [],
+                options: [],
+                length: data[i].ProductName.replace(/\D/g,'')
+            };
+            if(data[i].ProductName.indexOf('Fixed')) {
+                sortedData[data[i].ProductIndex].type = 'Yr Fixed';
+            }
+        }
+        sortedData[data[i].ProductIndex].rates.push(data[i].Rate);
+        sortedData[data[i].ProductIndex].payments.push(data[i].Payments[0].Amount);
+        sortedData[data[i].ProductIndex].totals.push(data[i].Price);
+        sortedData[data[i].ProductIndex].options.push(data[i]);
+    }
+    for(var prop in sortedData) {
+        sortedData[prop].rates.sort();
+        sortedData[prop].payments.sort();
+        sortedData[prop].totals.sort();
+    }
+    return sortedData;
+};

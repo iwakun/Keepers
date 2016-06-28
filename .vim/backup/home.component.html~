@@ -1,0 +1,34 @@
+<div class="center container-fluid">
+    <div class="rate-app row">
+        <div class="rate-app-form rate-app-sidebar col-sm-4">
+            <h2>Get an Instant Mortgage Rate Quote</h2>
+            <form>
+                <label>Loan Purpose</label>
+                <div dropdown-select="options" dropdown-model="selectedOption"></div>
+                <button
+                    class="rate-app-button rate-app-button-primary">
+                    Get Rates
+                </button>
+            </form>
+        </div>
+        <div class="rate-app-main col-sm-8">
+            <div class="rate-app-main-home">
+                <h2>Three Easy Steps</h2>
+                <div class="rate-app-steps row">
+                    <div class="rate-app-step step-1 col-sm-4">
+                        <span></span>
+                        Answer a Few Questions
+                    </div>
+                    <div class="rate-app-step step-2 col-sm-4">
+                        <span></span>
+                        View Quotes, Change Criteria, Make Decisions
+                    </div>
+                    <div class="rate-app-step step-3 col-sm-4">
+                        <span></span>
+                        Email Details or Take your First Steps &amp; Apply
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

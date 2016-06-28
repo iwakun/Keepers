@@ -1,0 +1,31 @@
+<div class="course-directory">
+	<?php $count = 0; ?>
+	<?php foreach($courses_list as $category => $cat_courses): ?>
+		<div class="course-single" data-component="accordion">
+			<h2 data-accordion="link">
+				<?= $category ?> <?= ($count % 2 == '0') ? ' Courses' : ' Training'; ?>
+			</h2>
+			<div 
+				class="course-list" 
+				data-accordion="content"
+				id="<?= Course::getCategoryURLName($category) ?>">
+				<span>
+					(Click on the course links below for detailed course
+					information and purchase options.)
+				</span>
+				<ul>
+					<?php foreach($cat_courses as $course): ?>
+						<li>
+							<span>&bull;</span>
+							<a href="<?php echo $course->getUrl() ?>">
+								<?php echo $course->getTitle(); ?>
+							</a>
+							<?php echo $course->getStatusHtml(); ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>	
+		</div>
+		<?php $count++; ?>
+	<?php endforeach; ?>
+</div>

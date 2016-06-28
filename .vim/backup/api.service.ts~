@@ -1,0 +1,1362 @@
+import { Injectable } from '@angular/core';
+var instance;
+
+var creditScoreOptions = [
+    {
+        "id": 639,
+            "name": "620-639"
+    },
+    {
+        "id": 659,
+        "name": "640-659"
+    },
+    {
+        "id": 679,
+        "name": "660-679"
+    },
+    {
+        "id": 699,
+        "name": "680-699"
+    },
+    {
+        "id": 719,
+        "name": "700-719"
+    },
+    {
+        "id": 739,
+        "name": "720-739"
+    },
+    {
+        "id": 741,
+        "name": "740+"
+    }
+];
+var usStates = [
+    {
+        "id": 1,
+            "name": "Alabama (AL)"
+    },
+    {
+        "id": 2,
+        "name": "Alaska (AK)"
+    },
+    {
+        "id": 3,
+        "name": "Arizona (AZ)"
+    },
+    {
+        "id": 4,
+        "name": "Arkansas (AR)"
+    },
+    {
+        "id": 5,
+        "name": "California (CA)"
+    },
+    {
+        "id": 6,
+        "name": "Colorado (CO)"
+    },
+    {
+        "id": 7,
+        "name": "Connecticut (CT)"
+    },
+    {
+        "id": 8,
+        "name": "Delaware (DE)"
+    },
+    {
+        "id": 9,
+        "name": "District of Columbia (DC)"
+    },
+    {
+        "id": 10,
+        "name": "Florida (FL)"
+    },
+    {
+        "id": 11,
+        "name": "Georgia (GA)"
+    },
+    {
+        "id": 12,
+        "name": "Hawaii (HI)"
+    },
+    {
+        "id": 13,
+        "name": "Idaho (ID)"
+    },
+    {
+        "id": 14,
+        "name": "Illinois (IL)"
+    },
+    {
+        "id": 15,
+        "name": "Indiana (IN)"
+    },
+    {
+        "id": 16,
+        "name": "Iowa (IA)"
+    },
+    {
+        "id": 17,
+        "name": "Kansas (KS)"
+    },
+    {
+        "id": 18,
+        "name": "Kentucky (KY)"
+    },
+    {
+        "id": 19,
+        "name": "Louisiana (LA)"
+    },
+    {
+        "id": 20,
+        "name": "Maine (ME)"
+    },
+    {
+        "id": 21,
+        "name": "Maryland (MD)"
+    },
+    {
+        "id": 22,
+        "name": "Massachusetts (MA)"
+    },
+    {
+        "id": 23,
+        "name": "Michigan (MI)"
+    },
+    {
+        "id": 24,
+        "name": "Minnesota (MN)"
+    },
+    {
+        "id": 25,
+        "name": "Mississippi (MS)"
+    },
+    {
+        "id": 26,
+        "name": "Missouri (MO)"
+    },
+    {
+        "id": 27,
+        "name": "Montana (MT)"
+    },
+    {
+        "id": 28,
+        "name": "Nebraska (NE)"
+    },
+    {
+        "id": 29,
+        "name": "Nevada (NV)"
+    },
+    {
+        "id": 30,
+        "name": "New Hampshire (NH)"
+    },
+    {
+        "id": 31,
+        "name": "New Jersey (NJ)"
+    },
+    {
+        "id": 32,
+        "name": "New Mexico (NM)"
+    },
+    {
+        "id": 33,
+        "name": "New York (NY)"
+    },
+    {
+        "id": 34,
+        "name": "North Carolina (NC)"
+    },
+    {
+        "id": 35,
+        "name": "North Dakota (ND)"
+    },
+    {
+        "id": 36,
+        "name": "Ohio (OH)"
+    },
+    {
+        "id": 37,
+        "name": "Oklahoma (OK)"
+    },
+    {
+        "id": 38,
+        "name": "Oregon (OR)"
+    },
+    {
+        "id": 39,
+        "name": "Pennsylvania (PA)"
+    },
+    {
+        "id": 40,
+        "name": "Rhode Island (RI)"
+    },
+    {
+        "id": 41,
+        "name": "South Carolina (SC)"
+    },
+    {
+        "id": 42,
+        "name": "South Dakota (SD)"
+    },
+    {
+        "id": 43,
+        "name": "Tennessee (TN)"
+    },
+    {
+        "id": 44,
+        "name": "Texas (TX)"
+    },
+    {
+        "id": 45,
+        "name": "Utah (UT)"
+    },
+    {
+        "id": 46,
+        "name": "Vermont (VT)"
+    },
+    {
+        "id": 47,
+        "name": "Virginia (VA)"
+    },
+    {
+        "id": 48,
+        "name": "Washington (WA)"
+    },
+    {
+        "id": 49,
+        "name": "West Virginia (WV)"
+    },
+    {
+        "id": 50,
+        "name": "Wisconsin (WI)"
+    },
+    {
+        "id": 51,
+        "name": "Wyoming (WY)"
+    }
+];
+var macuStates = [
+    {
+        "id": 3,
+            "name": "Arizona (AZ)"
+    },
+    {
+        "id": 13,
+        "name": "Idaho (ID)"
+    },
+    {
+        "id": 29,
+        "name": "Nevada (NV)"
+    },
+    {
+        "id": 32,
+        "name": "New Mexico (NM)"
+    },
+    {
+        "id": 45,
+        "name": "Utah (UT)"
+    }
+];
+var arizonaCounties = [
+    {
+        "id": 1,
+            "name": "Apache"
+    },
+    {
+        "id": 2,
+        "name": "Cochise"
+    },
+    {
+        "id": 3,
+        "name": "Coconino"
+    },
+    {
+        "id": 4,
+        "name": "Gila"
+    },
+    {
+        "id": 5,
+        "name": "Graham"
+    },
+    {
+        "id": 6,
+        "name": "Greenlee"
+    },
+    {
+        "id": 7,
+        "name": "La Paz"
+    },
+    {
+        "id": 8,
+        "name": "Maricopa"
+    },
+    {
+        "id": 9,
+        "name": "Mohave"
+    },
+    {
+        "id": 10,
+        "name": "Navajo"
+    },
+    {
+        "id": 11,
+        "name": "Pima"
+    },
+    {
+        "id": 12,
+        "name": "Pinal"
+    },
+    {
+        "id": 13,
+        "name": "Santa Cruz"
+    },
+    {
+        "id": 14,
+        "name": "Yavapai"
+    },
+    {
+        "id": 15,
+        "name": "Yuma"
+    }
+];
+var idahoCounties = [
+    {
+        "id": 1,
+            "name": "Ada"
+    },
+    {
+        "id": 2,
+        "name": "Adams"
+    },
+    {
+        "id": 3,
+        "name": "Bannock"
+    },
+    {
+        "id": 4,
+        "name": "Bear Lake"
+    },
+    {
+        "id": 5,
+        "name": "Benewah"
+    },
+    {
+        "id": 6,
+        "name": "Bingham"
+    },
+    {
+        "id": 7,
+        "name": "Blaine"
+    },
+    {
+        "id": 8,
+        "name": "Boise"
+    },
+    {
+        "id": 9,
+        "name": "Bonner"
+    },
+    {
+        "id": 10,
+        "name": "Bonneville"
+    },
+    {
+        "id": 11,
+        "name": "Boundary"
+    },
+    {
+        "id": 12,
+        "name": "Butte"
+    },
+    {
+        "id": 13,
+        "name": "Camas"
+    },
+    {
+        "id": 14,
+        "name": "Canyon"
+    },
+    {
+        "id": 15,
+        "name": "Caribou"
+    },
+    {
+        "id": 16,
+        "name": "Cassia"
+    },
+    {
+        "id": 17,
+        "name": "Clark"
+    },
+    {
+        "id": 18,
+        "name": "Clearwater"
+    },
+    {
+        "id": 19,
+        "name": "Custer"
+    },
+    {
+        "id": 20,
+        "name": "Elmore"
+    },
+    {
+        "id": 21,
+        "name": "Franklin"
+    },
+    {
+        "id": 22,
+        "name": "Fremont"
+    },
+    {
+        "id": 23,
+        "name": "Gem"
+    },
+    {
+        "id": 24,
+        "name": "Gooding"
+    },
+    {
+        "id": 25,
+        "name": "Idaho"
+    },
+    {
+        "id": 26,
+        "name": "Jefferson"
+    },
+    {
+        "id": 27,
+        "name": "Jerome"
+    },
+    {
+        "id": 28,
+        "name": "Kootenai"
+    },
+    {
+        "id": 29,
+        "name": "Latah"
+    },
+    {
+        "id": 30,
+        "name": "Lemhi"
+    },
+    {
+        "id": 31,
+        "name": "Lewis"
+    },
+    {
+        "id": 32,
+        "name": "Lincoln"
+    },
+    {
+        "id": 33,
+        "name": "Madison"
+    },
+    {
+        "id": 34,
+        "name": "Minidoka"
+    },
+    {
+        "id": 35,
+        "name": "Nez Perce"
+    },
+    {
+        "id": 36,
+        "name": "Oneida"
+    },
+    {
+        "id": 37,
+        "name": "Owyhee"
+    },
+    {
+        "id": 38,
+        "name": "Payette"
+    },
+    {
+        "id": 39,
+        "name": "Power"
+    },
+    {
+        "id": 40,
+        "name": "Shoshone"
+    },
+    {
+        "id": 41,
+        "name": "Teton"
+    },
+    {
+        "id": 42,
+        "name": "Twin Falls"
+    },
+    {
+        "id": 43,
+        "name": "Valley"
+    },
+    {
+        "id": 44,
+        "name": "Washington"
+    }
+];
+var nevadaCounties = [
+    {
+        "id": 1,
+            "name": "Churchill"
+    },
+    {
+        "id": 2,
+        "name": "Clark"
+    },
+    {
+        "id": 3,
+        "name": "Douglas"
+    },
+    {
+        "id": 4,
+        "name": "Elko"
+    },
+    {
+        "id": 5,
+        "name": "Esmeralda"
+    },
+    {
+        "id": 6,
+        "name": "Eureka"
+    },
+    {
+        "id": 7,
+        "name": "Humboldt"
+    },
+    {
+        "id": 8,
+        "name": "Lander"
+    },
+    {
+        "id": 9,
+        "name": "Lincoln"
+    },
+    {
+        "id": 10,
+        "name": "Lyon"
+    },
+    {
+        "id": 11,
+        "name": "Mineral"
+    },
+    {
+        "id": 12,
+        "name": "Nye"
+    },
+    {
+        "id": 13,
+        "name": "Pershing"
+    },
+    {
+        "id": 14,
+        "name": "Storey"
+    },
+    {
+        "id": 15,
+        "name": "Washoe"
+    },
+    {
+        "id": 16,
+        "name": "White Pine"
+    },
+    {
+        "id": 17,
+        "name": "Carson City"
+    }
+];
+var newMexicoCounties = [
+    {
+        "id": 1,
+            "name": "Bernalillo"
+    },
+    {
+        "id": 2,
+        "name": "Catron"
+    },
+    {
+        "id": 3,
+        "name": "Chaves"
+    },
+    {
+        "id": 4,
+        "name": "Cibola"
+    },
+    {
+        "id": 5,
+        "name": "Colfax"
+    },
+    {
+        "id": 6,
+        "name": "Curry"
+    },
+    {
+        "id": 7,
+        "name": "De Baca"
+    },
+    {
+        "id": 8,
+        "name": "Doña Ana"
+    },
+    {
+        "id": 9,
+        "name": "Eddy"
+    },
+    {
+        "id": 10,
+        "name": "Grant"
+    },
+    {
+        "id": 11,
+        "name": "Guadalupe"
+    },
+    {
+        "id": 12,
+        "name": "Harding"
+    },
+    {
+        "id": 13,
+        "name": "Hidalgo"
+    },
+    {
+        "id": 14,
+        "name": "Lea"
+    },
+    {
+        "id": 15,
+        "name": "Lincoln"
+    },
+    {
+        "id": 16,
+        "name": "Los Alamos"
+    },
+    {
+        "id": 17,
+        "name": "Luna"
+    },
+    {
+        "id": 18,
+        "name": "McKinley"
+    },
+    {
+        "id": 19,
+        "name": "Mora"
+    },
+    {
+        "id": 20,
+        "name": "Otero"
+    },
+    {
+        "id": 21,
+        "name": "Quay"
+    },
+    {
+        "id": 22,
+        "name": "Rio Arriba"
+    },
+    {
+        "id": 23,
+        "name": "Roosevelt"
+    },
+    {
+        "id": 24,
+        "name": "Sandoval"
+    },
+    {
+        "id": 25,
+        "name": "San Juan"
+    },
+    {
+        "id": 26,
+        "name": "San Miguel"
+    },
+    {
+        "id": 27,
+        "name": "Santa Fe"
+    },
+    {
+        "id": 28,
+        "name": "Sierra"
+    },
+    {
+        "id": 29,
+        "name": "Socorro"
+    },
+    {
+        "id": 30,
+        "name": "Taos"
+    },
+    {
+        "id": 31,
+        "name": "Torrance"
+    },
+    {
+        "id": 32,
+        "name": "Union"
+    },
+    {
+        "id": 33,
+        "name": "Valencia"
+    }
+];
+var utahCounties = [
+    {
+        "id": 1,
+            "name": "Beaver"
+    },
+    {
+        "id": 2,
+        "name": "Box Elder"
+    },
+    {
+        "id": 3,
+        "name": "Cache"
+    },
+    {
+        "id": 4,
+        "name": "Carbon"
+    },
+    {
+        "id": 5,
+        "name": "Daggett"
+    },
+    {
+        "id": 6,
+        "name": "Davis"
+    },
+    {
+        "id": 7,
+        "name": "Duchesne"
+    },
+    {
+        "id": 8,
+        "name": "Emery"
+    },
+    {
+        "id": 9,
+        "name": "Garfield"
+    },
+    {
+        "id": 10,
+        "name": "Grand"
+    },
+    {
+        "id": 11,
+        "name": "Iron"
+    },
+    {
+        "id": 12,
+        "name": "Juab"
+    },
+    {
+        "id": 13,
+        "name": "Kane"
+    },
+    {
+        "id": 14,
+        "name": "Millard"
+    },
+    {
+        "id": 15,
+        "name": "Morgan"
+    },
+    {
+        "id": 16,
+        "name": "Piute"
+    },
+    {
+        "id": 17,
+        "name": "Rich"
+    },
+    {
+        "id": 18,
+        "name": "Salt Lake"
+    },
+    {
+        "id": 19,
+        "name": "San Juan"
+    },
+    {
+        "id": 20,
+        "name": "Sanpete"
+    },
+    {
+        "id": 21,
+        "name": "Sevier"
+    },
+    {
+        "id": 22,
+        "name": "Summit"
+    },
+    {
+        "id": 23,
+        "name": "Tooele"
+    },
+    {
+        "id": 24,
+        "name": "Uintah"
+    },
+    {
+        "id": 25,
+        "name": "Utah"
+    },
+    {
+        "id": 26,
+        "name": "Wasatch"
+    },
+    {
+        "id": 27,
+        "name": "Washington"
+    },
+    {
+        "id": 28,
+        "name": "Wayne"
+    },
+    {
+        "id": 29,
+        "name": "Weber"
+    }
+];
+var loanPurpose = [
+    {
+        "id": 1,
+            "name": "Purchase"
+    },
+    {
+        "id": 2,
+        "name": "Refinance Cash Out"
+    },
+    {
+        "id": 3,
+        "name": "Refinance"
+    }
+];
+var propertyType = [
+    {
+        "id": 1,
+            "name": "Condo"
+    },
+    {
+        "id": 2,
+        "name": "Single Family"
+    },
+    {
+        "id": 3,
+        "name": "Townhouse"
+    }
+];
+var loanProducts = [
+    {
+        "id":0,
+        "name":"Conforming 5 Yr LIBOR Non Conv ARM 2/2/5 Caps"
+    },{
+        "id":1,
+        "name":"Conforming 7 Yr LIBOR Non Conv ARM 5/2/5 Caps"
+    },{
+        "id":2,
+        "name":"10 Year Fixed Released"
+    },{
+        "id":3,
+        "name":"15 Year Fixed Released"
+    },{
+        "id":4,
+        "name":"20 Year Fixed Released"
+    },{
+        "id":5,
+        "name":"30 Year Fixed Released"
+    }
+];
+var loanRates = [
+    {
+        "Apr": 3.622,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1105.24}],
+        "Price": 98.375,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.375,
+        "TotalClosingCost": 9076
+    },
+    {
+        "Apr": 3.595,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1417.99}],
+        "Price": 98.375,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.25,
+        "TotalClosingCost": 9076
+    },
+    {
+        "Apr": 2.863,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1666.97}],
+        "Price": 98.875,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.5,
+        "TotalClosingCost": 7826
+    },
+    {
+        "Apr": 3.686,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1122.61}],
+        "Price": 99.125,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.5,
+        "TotalClosingCost": 7202
+    },
+    {
+        "Apr": 3.62,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1433.89}],
+        "Price": 99.25,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.375,
+        "TotalClosingCost": 6889
+    },
+    {
+        "Apr": 2.862,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1681.72}],
+        "Price": 99.75,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.625,
+        "TotalClosingCost": 5639
+    },
+    {
+        "Apr": 3.739,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1140.13}],
+        "Price": 100,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.625,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.659,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1449.9}],
+        "Price": 100,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.5,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 2.951,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1696.55}],
+        "Price": 100,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.75,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.865,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1157.79}],
+        "Price": 100.5,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.75,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.785,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1466.01}],
+        "Price": 100.5,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.625,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.077,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1711.46}],
+        "Price": 100.625,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 2.875,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.991,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1175.59}],
+        "Price": 100.875,
+        "ProductIndex": 6888371,
+        "ProductName": "30 Year Fixed Released",
+        "Rate": 3.875,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.911,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1482.22}],
+        "Price": 100.875,
+        "ProductIndex": 6888410,
+        "ProductName": "20 Year Fixed Released",
+        "Rate": 3.75,
+        "TotalClosingCost": 5014
+    },
+    {
+        "Apr": 3.202,
+        "Fees": [
+            { "Amount": 440, "Name": "Appraisal Fee" },
+            { "Amount": 25, "Name": "Credit Report Fee" },
+            { "Amount": 2500, "Name": "Loan Origination Fee" },
+            { "Amount": 85, "Name": "Recording Fee" },
+            { "Amount": 650, "Name": "Processing Fee" },
+            { "Amount": 340, "Name": "Settlement or Closing Fee" },
+            { "Amount": 85, "Name": "Title Endorsment Fee" },
+            { "Amount": 889, "Name": "Title Services or Lender's Title Insurance" }
+        ],
+        "InputSetIndex": 649996318,
+        "LockPeriod": 55,
+        "Payments": [{"Amount": 1726.45}],
+        "Price": 101,
+        "ProductIndex": 6888411,
+        "ProductName": "15 Year Fixed Released",
+        "Rate": 3,
+        "TotalClosingCost": 5014
+    }
+];
+var macuStateIds = [3, 13, 29, 32, 45];
+
+@Injectable()
+export class Api {
+    getInstance() {
+        function init() {
+            function getStateHostContractModelName(stateId) {
+                var hostContractModelName;
+
+                switch(stateId) {
+                    case 3: //Arizona
+                        hostContractModelName = "ArizonaState";
+                        break;
+                    case 13: //Idaho
+                        hostContractModelName = "IdahoState";
+                        break;
+                    case 29: //Nevada
+                        hostContractModelName = "NevadaState";
+                        break;
+                    case 32: //New Mexico
+                        hostContractModelName = "NewMexicoState";
+                        break;
+                    case 45: //Utah
+                        hostContractModelName = "UtahState";
+                        break;
+                    default:
+                        //error
+                        console.log("State Id out of range");
+                }
+                return hostContractModelName;
+            }
+            return {
+                getCreditScoreOptions: function() {
+                    return creditScoreOptions;
+                },
+                getLoanPurposeOptions: function(){
+                    return loanPurpose;
+                },
+                getLoanProductOptions: function() {
+                    return loanProducts;
+                },
+                getPropertyTypeOptions: function(){
+                    return propertyType;
+                },
+                getArizonaCounties: function(){
+                    return arizonaCounties;
+                },
+                getIdahoCounties: function(){
+                    return idahoCounties;
+                },
+                getNevadaCounties: function(){
+                    return nevadaCounties;
+                },
+                getNewMexicoCounties: function(){
+                    return newMexicoCounties;
+                },
+                getUtahCounties: function(){
+                    return utahCounties;
+                },
+                getCountyOptionsByStateId: function(stateId){
+                    var countyOptions;
+
+                    switch(stateId) {
+                        case 3: //Arizona
+                            countyOptions = this.getArizonaCounties();
+                            break;
+                        case 13: //Idaho
+                            countyOptions = this.getIdahoCounties();
+                            break;
+                        case 29: //Nevada
+                            countyOptions = this.getNevadaCounties();
+                            break;
+                        case 32: //New Mexico
+                            countyOptions = this.getNewMexicoCounties();
+                            break;
+                        case 45: //Utah
+                            countyOptions = this.getUtahCounties();
+                            break;
+                        default:
+                            console.log("State Id out of range");
+                    }
+
+                    return countyOptions;
+                },
+                getStateOptions: function(){
+                    return macuStates;
+                },
+                getRates: function(
+                    creditScore,
+                    loanAmount,
+                    loanPurpose,
+                    propertyAmount,
+                    propertyType,
+                    stateId,
+                    countyId
+                ) {
+                    var loanProductsRequest = {
+                        "CreditScore": creditScore,
+                        "LoanAmount": loanAmount,
+                        "LoanPurpose": loanPurpose,
+                        "PropertyAmount": propertyAmount,
+                        "PropertyType": propertyType,
+                        "State": {
+                            "$type":"Macu.MortgageRates.Core.Models." + getStateHostContractModelName(stateId)  + ", Macu.MortgageRates.Core",
+                            "County": countyId,
+                            "UsState": stateId
+                        }
+                    };
+                    function sortLoansIntoGroups(data) {
+                        var sortedData = [];
+                        for(var datum of data) {
+                            if(typeof sortedData[datum.ProductIndex] === 'undefined') {
+                                sortedData[datum.ProductIndex] = {
+                                    rates: [],
+                                    payments: [],
+                                    totals: [],
+                                    options: [],
+                                    length: datum.ProductName.replace(/\D/g,'')
+                                };
+                                if(datum.ProductName.indexOf('Fixed')) {
+                                    sortedData[datum.ProductIndex].type = 'Yr Fixed';
+                                }
+                            }
+                            datum.payment = datum.Payments[0].Amount;
+                            datum.rate = datum.Rate;
+                            datum.total = datum.Price;
+                            datum.points = 100 - datum.Price;
+                            var titleFees =
+                                getFeeByName(datum, 'Recording Fee') +
+                                getFeeByName(datum, "Title Services or Lender's Title Insurance") +
+                                getFeeByName(datum, 'Settlement or Closing Fee') +
+                                getFeeByName(datum, 'Title Endorsment Fee');
+                            datum.titleFees = titleFees;
+                            datum.totalThirdParty =
+                                titleFees +
+                                getFeeByName(datum, 'Credit Report Fee') +
+                                getFeeByName(datum, 'Appraisal Fee');
+                            sortedData[datum.ProductIndex].rates.push(datum.rate);
+                            sortedData[datum.ProductIndex].payments.push(datum.payment);
+                            sortedData[datum.ProductIndex].totals.push(datum.total);
+                            sortedData[datum.ProductIndex].options.push(datum);
+                        }
+                        for(var prop in sortedData) {
+                            sortedData[prop].rates.sort();
+                            sortedData[prop].payments.sort();
+                            sortedData[prop].totals.sort();
+                        }
+                        var finalSortedData = [];
+                        for(var prop in sortedData) {
+                            finalSortedData.push(sortedData[prop]);
+                        }
+                        return finalSortedData;
+                    }
+                    function getFeeByName(datum, name) {
+                        for(var fee of datum.Fees) {
+                            if(fee.Name == name) {
+                                return parseFloat(fee.Amount);
+                            }
+                        }
+                        return 0;
+                    }
+                    var sortedLoans = sortLoansIntoGroups(loanRates);
+                    return Promise.resolve(sortedLoans);
+                }
+            }
+        }
+        if (!instance){
+            instance = init();
+        }
+        return instance;
+    }
+}
+

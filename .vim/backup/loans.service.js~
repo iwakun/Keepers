@@ -1,0 +1,55 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var core_1 = require('@angular/core');
+var mock_loans_1 = require('./mock-loans');
+var LoanService = (function () {
+    function LoanService() {
+    }
+    LoanService.prototype.getLoans = function () {
+        return Promise.resolve(sortLoansIntoGroups(mock_loans_1.LOANS));
+    };
+    LoanService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [])
+    ], LoanService);
+    return LoanService;
+}());
+exports.LoanService = LoanService;
+function sortLoansIntoGroups(data) {
+    var sortedData = [];
+    for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
+        var datum = data_1[_i];
+        if (typeof sortedData[datum.ProductIndex] === 'undefined') {
+            sortedData[datum.ProductIndex] = {
+                rates: [],
+                payments: [],
+                totals: [],
+                options: [],
+                length: datum.ProductName.replace(/\D/g, '')
+            };
+            if (datum.ProductName.indexOf('Fixed')) {
+                sortedData[datum.ProductIndex].type = 'Yr Fixed';
+            }
+        }
+        sortedData[datum.ProductIndex].rates.push(datum.Rate);
+        sortedData[datum.ProductIndex].payments.push(datum.Payments[0].Amount);
+        sortedData[datum.ProductIndex].totals.push(datum.Price);
+        sortedData[datum.ProductIndex].options.push(datum);
+    }
+    for (var prop in sortedData) {
+        sortedData[prop].rates.sort();
+        sortedData[prop].payments.sort();
+        sortedData[prop].totals.sort();
+    }
+    return sortedData;
+}
+;
+//# sourceMappingURL=loans.service.js.map

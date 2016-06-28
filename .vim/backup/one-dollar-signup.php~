@@ -1,0 +1,47 @@
+<?php
+require_once('includes/boot.inc.php');
+
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : false;
+
+$courses_list = Course::getCoursesByCategory();
+
+$searchCat = 'gogogh_courses';
+
+$code = (isset($_GET['code'])) ? $_GET['code'] : false;
+
+$p->title = "Course List | Instructor-Led Online IT and Technical Training Classes";
+$p->description = "Online IT and technical training courses taught by proven
+    technology experts. Instructor interaction, hands-on exercises, quality
+    training.";
+?>
+<?php include(GG_ROOT.'/includes/header.php'); ?>
+<div class="courses-background" data-component="parallax-background"></div>
+<div class="main">
+    <div class="title-box">
+        <h1>
+            New Member Discount
+            <span>Take 50% off a 30 day course</span>
+        </h1>
+        <p>
+            Welcome <?= $user->Name ?>.
+            <?php if($code): ?>
+                Your New Member Discount Code is
+                <strong><?= $code ?></strong>.
+            <?php else: ?>
+                Check your email for your New Member Discount Code.
+            <?php endif; ?>
+        </p>
+        <ul style="text-align: left; width: 405px; margin: 0 auto; font-size: 14px;">
+            <li>Select the course you'd like to take below</li>
+            <li>Click the "Add to Cart" button, and select the 30 day option</li>
+            <li>Enter your coupon code in the shopping cart</li>
+            <li>Complete the purchasing process</li>
+            <li>Get started learning</li>
+        </ul>
+    </div>
+
+    <?php include(GG_ROOT.'/includes/search-box.php'); ?>
+    <?php include(GG_ROOT.'/training/courses/_course-listing.php'); ?>
+
+</div>
+<?php include(GG_ROOT.'/includes/footer.php'); ?>

@@ -75,10 +75,13 @@ set scrolloff=3 " Don't let the cursor touch the edge of the viewport
 syntax on
 let g:javascript_enable_domhtmlcss = 1
 
-set termguicolors
+if has('nvim')
+    set termguicolors
+endif
 set t_Co=256
 set background=dark
 colo tender
+let g:tender_lightline = 1
 let g:lightline = { 'colorscheme': 'tender' }
 set title " change the terminal's title
 if has('mouse')
@@ -89,7 +92,7 @@ endif
 " Folding Options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set foldenable
-set foldmethod=syntax
+set foldmethod=indent
 set foldlevel=100
 set foldopen-=search
 set foldopen-=undo

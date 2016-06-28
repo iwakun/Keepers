@@ -1,0 +1,204 @@
+<div class="rate-app-main-rate">
+    <div class="rate-app-home-icon"></div>
+    <div class="rate-app-main-content">
+        <h2>Your Rate Options</h2>
+        <p class="rate-date">06.01.16 7:29 PM</p>
+        <p class="rate-introduction">
+            Choose your rate, payment or total cost and see how they affect each other
+        </p>
+        <div class="rate-options">
+            <div class="rate-options-tabs row">
+                <div class="rate-options-tab col-sm-15">
+                    <strong>20</strong>
+                    Yr Fixed
+                </div>
+            </div>
+        </div>
+        <div class="rate-app-block rate-app-summary row">
+            <div class="col-xs-12">
+                <h2>Loan Summary</h2>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Points</h3>
+                <p>0,000</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>APR</h3>
+                <p>00.00%</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Loan to Value</h3>
+                <p>00.00%</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Loan Purpose</h3>
+                <p>Refinance</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Loan Amount</h3>
+                <p>$000,000,000</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>State</h3>
+                <p>Utah</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Loan Program</h3>
+                <p>30 Year Fixed</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Property Type</h3>
+                <p>Single Family Residence</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Property Value</h3>
+                <p>$000,000,000</p>
+            </div>
+            <div class="rate-app-summary-item col-md-15 col-xs-6">
+                <h3>Lock Period</h3>
+                <p>30 days</p>
+            </div>
+        </div>
+        <div class="rate-app-block rate-app-costs row">
+            <div class="col-xs-12">
+                <h2>Closing Costs</h2>
+            </div>
+            <div class="col-sm-6">
+                <div class="rate-app-costs-block">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h3>Lender Fees</h3>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Processing Fee</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$0,000.00</p>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Points of Lender Credit</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$0,000.00</p>
+                        </div>
+                    </div>
+                    <div class="rate-app-total-row row">
+                        <div class="col-sm-8">
+                            <p>Total Lender Fees</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="rate-app-costs-block">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h3>Other Items Due at Closing</h3>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Interest for partial month</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Home owner's insurance</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Property taxes</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="rate-app-costs-block">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <h3>Estimated Third-Party Costs</h3>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Appraisal</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Credit Report</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                        <div class="col-sm-8">
+                            <p>Title Fees</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                    </div>
+                    <div class="rate-app-total-row row">
+                        <div class="col-sm-8">
+                            <p>Total Estiamted Third Party Costs</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                    </div>
+                    <div class="rate-app-total-row row">
+                        <div class="col-sm-8">
+                            <p>Total Estiamted Closing Costs</p>
+                        </div>
+                        <div class="col-sm-4 rate-app-totals">
+                            <p>$00,000.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rate-app-block rate-app-email">
+            <h2>Not the Rate You're Looking For?</h2>
+            <p>We can contact you when the rate you're looking for is reached.</p>
+            <div class="rate-app-form">
+                <form>
+                    <fieldset>
+                        <label>Name</label>
+                        <input type="text" placeholder="Hint Text">
+                        <label>Loan Purpose</label>
+                        <div dropdown-select="options" dropdown-model="selectedOption"></div>
+                    </fieldset>
+                    <div class="rate-app-button-set">
+                        <button
+                            class="rate-app-button rate-app-button-primary">
+                            Apply Now
+                        </button>
+                        <button
+                            class="rate-app-button rate-app-button-secondary">
+                            Email Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="rate-app-block rate-app-footer row">
+            <div class="col-sm-6">
+                <h2>Meet with a Mortgage Specialist Today</h2>
+                <button class="rate-app-button rate-app-button-primary">
+                    Schedule Appointment Now
+                </button>
+            </div>
+            <div class="col-sm-6">
+                <h2>Loan Summary</h2>
+                <ul>
+                    <li>Pay your mortgage locally at a branch</li>
+                    <li>Quick Close paperless closing available</li>
+                    <li>Low Mortgage insurance</li>
+                    <li>Loan services throuh Mountain America</li>
+                    <li>Competitive Interest Rates</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

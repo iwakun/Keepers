@@ -1,0 +1,791 @@
+<?php
+class User extends GGObject {
+    private $gopass;
+    private $subscription;
+    private $course_purchases;
+    private $cart;
+
+    public function __construct($id = 0) {
+        global $db;
+        $this->db_table_name = 'user';
+        $this->db_id_field = 'UserID';
+        $this->id = $id;
+        parent::__construct($id);
+        $sql = "SELECT * FROM settings WHERE UserID = ?";
+        $settings = $db->read($sql, array($this->id), GGDB::FETCH_ONE);
+        if(!empty($settings)) {
+            $this->data = array_merge($this->data, $settings);
+        }
+    }
+
+    /*** Loging in and account creation ***/
+    public function login($email, $password) {
+        global $db;
+        $email = strtolower($email);
+        $password = md5($password);
+
+        $sql = "SELECT UserID, Password
+                FROM `user`
+                WHERE LOWER(`Email`) = ?
+                AND site = ?
+                AND isActive != 'no'";
+        if($_user = $db->read($sql, array($email, GG_SITE), GGDB::FETCH_ONE)) {
+            if($_user['Password'] !== $password) {
+                throw new Exception('Password is incorrect.');
+            }
+
+            $this->id = $_user['UserID'];
+
+            /* Unused for now.
+            // Check to see if user is active
+            if($this->isActive == 'incomplete') {
+                $msg = "Unable to log in. Your account has not been confirmed yet.
+                        Please check your email for the confirmation link
+                        (possibly in your spam box), or
+                        <a href=\"/user/resubmit-confirm-email.php?id={$this->id}\">Click here to
+                        resend your email</a>.";
+                throw new Exception($msg);
+                return false;
+            }
+            */
+
+            // Set current session_id
+            if(isset($_COOKIE['session_id'])) {
+                $this->last_session = $_COOKIE['session_id'];
+            }
+
+            // Record the session_id
+            $s = session_id();
+            $sql = "UPDATE user
+                    SET last_session = ?, last_active_time = NOW()
+                    WHERE UserID = ?";
+            $db->write($sql, array($s, $this->id));
+            $expire = time() + (3600 * 24 * 30); // 30 days
+            setcookie('session_id', $s, $expire, '/');
+
+            // Check to see if a cart exists for the current session_id and use that.
+            $sql = "SELECT id FROM cart WHERE session_id = ?";
+            if($id = $db->read($sql, array($s), GGDB::FETCH_SCALER)) {
+                $sql = "UPDATE cart SET UserID = ? WHERE id = ?";
+                $db->write($sql, array($this->id, $id));
+            }
+
+            // Log the login action
+            $sql = "INSERT INTO log (UserID, Time, Type, TypeID, site)
+                    VALUES (?, NOW(), 'login', '0', ?)";
+            $res = $db->write($sql, array($this->id, GG_SITE));
+
+            $_SESSION['userid'] = $this->id;
+            return true;
+        } else {
+            throw new Exception('Unknown username.');
+            return false;
+        }
+    }
+    public function logout() {
+        global $db, $user;
+        if(!$this->isLoggedIn()) {
+            throw new Exception('You are not logged in');
+            return false;
+        }
+        $sql = "UPDATE user
+                SET last_active_time = '0', last_session = '0'
+                WHERE UserID = ?";
+        $db->write($sql, array($this->id));
+
+        if(isset($_SESSION['userid'])) unset($_SESSION['userid']);
+        $expire = time() - 3600; // Negative time destroys cookie
+        setcookie('session_id', '0', $expire, '/');
+        session_destroy();
+        $session = new Session();
+        session_start();
+        $user = new User();
+        return true;
+    }
+    public static function createAccount($info) {
+        global $user, $db;
+        $info['Name'] = $info['FirstName'].' '.$info['LastName'];
+
+        if($user->isLoggedin()) {
+            throw new Exception("You are already logged in.");
+        }
+        // Check to see if email address is valid
+        if(!Email::validEmail($info['Email'])) {
+            throw new Exception("{$info['Email']} is not a valid email address. Please use a valid email address.");
+        }
+        if(trim($info['FirstName']) == '' || trim($info['LastName']) == '') {
+            throw new Exception("Please include your first and last name");
+        }
+        // Check to see if the email address is already in the database
+        $sql = "SELECT UserID
+                FROM `user`
+                WHERE LOWER(`Email`) = ? AND site = ?";
+        if($db->read($sql, array($info['Email'], GG_SITE), GGDB::FETCH_ONE)) {
+            throw new Exception("User with this email address already exists in the database.");
+        }
+
+        $new_user = new User();
+        // Already Checked
+        $new_user->setSingleData('FirstName', $info['FirstName']);
+        $new_user->setSingleData('LastName', $info['LastName']);
+        $new_user->setSingleData('Name', $info['FirstName'].' '.$info['LastName']);
+        $new_user->setSingleData('Email', $info['Email']);
+        $new_user->setSingleData('Password', md5($info['Password']));
+
+        // Programmatically set data
+        $new_user->setSingleData('isActive', 'incomplete');
+        $new_user->setSingleData('isCompany', 0);
+        $new_user->setSingleData('SignupDate', date('Y-m-d H:i:s', strtotime('now')));
+        $new_user->setSingleData('site', GG_SITE);
+        $referrer = (isset($_COOKIE['referrer'])) ? $_COOKIE['referrer'] : false;
+        if($referrer) $new_user->setSingleData('Referral', $referrer);
+
+        // Check all these fields, add them if they're there
+        if(!empty($info['referred_by'])) $new_user->setSingleData('referred_by', $info['referred_by']);
+        if(!empty($info['Company'])) $new_user->setSingleData('Company', $info['Company']);
+        if(!empty($info['Location'])) $new_user->setSingleData('Location', $info['Location']);
+        if(!empty($info['City'])) $new_user->setSingleData('City', $info['City']);
+        if(!empty($info['State'])) $new_user->setSingleData('State', $info['State']);
+        if(!empty($info['Zip'])) $new_user->setSingleData('Zip', $info['Zip']);
+        if(!empty($info['Country'])) $new_user->setSingleData('Country', $info['Country']);
+        if(!empty($info['Phone'])) {
+            $new_user->setSingleData('Phone', $info['Phone']);
+            $new_user->setSingleData('signup_phone', $info['Phone']);
+        }
+
+        // Save "Signup data" separately to idendify people who change their data later
+        $initial_data_fields = array(
+            'FirstName', 'LastName', 'Email', 'Phone', 'Company', 'Location', 'City', 'State', 'Zip'
+        );
+        $initial_data = array();
+        foreach($initial_data_fields as $field) {
+            if(isset($info[$field])) {
+                $initial_data[$field] = $info[$field];
+            }
+        }
+        $new_user->setSingleData('initial_signup', serialize($initial_data));
+
+        // Create and initialize new user
+        $userid = $new_user->save();
+        sleep(1); // Allow database writing to be completed.
+        $user = new User($userid);
+
+        // Write the default settings
+        $sql = "INSERT INTO settings (UserID) VALUES (?)";
+        $db->write($sql, array($user->id));
+
+        // Record the session id
+        $s = session_id();
+        $sql = "UPDATE user
+                SET last_session = ?, last_active_time = NOW(), isActive = 'yes'
+                WHERE UserID = ?";
+        $db->write($sql, array($s, $user->id));
+
+        // Set cookie
+        $expire = time() + (3600 * 24 * 30); // 30 days
+        setcookie('session_id', $s, $expire, '/');
+
+        // Log a login action
+        $sql = "INSERT INTO log (UserID, Time, Type, TypeID)
+                VALUES (?, NOW(), 'login', '0')";
+        $db->write($sql, array($user->id));
+
+        $_SESSION['userid'] = $user->id;
+
+        return $userid;
+    }
+    public function sendWelcomeEmail() {
+        global $db;
+        try {
+            $mail = new Email();
+            $mail->setTemplate('join');
+            $mail->subject = 'GogoTraining New Registration';
+            if(GG_LIVE_SERVER) {
+                $mail->to = array($this->Email);
+            } else {
+                $mail->to = array('bugs@gogotraining.com');
+            }
+            $coupon = new Coupon();
+            $code = $coupon->generateRandom('NMD', 4);
+            $data = array(
+                'CouponDescription' => 'New Member Discount for '.$this->Name,
+                'CouponCode' => $code,
+                'CouponType' => 'percent off',
+                'CouponCategory' => 'course',
+                'types' => array(10),
+                'CouponAmount' => '50',
+                'isOnetime' => '1',
+                'status' => '1'
+            );
+            $coupon->setData($data);
+            $coupon->save();
+            $sql = "SELECT Notes FROM user WHERE UserID = ?";
+            $notes = $db->read($sql, array($this->id), GGDB::FETCH_SCALER);
+            $notes .= "<p>New Member Discount Code: ".$code."</p>";
+            $sql = "UPDATE user SET Notes = ? WHERE UserID = ?";
+            $sql = $db->write($sql, array($notes, $this->id));
+            $mail->addData('email.title', 'Welcome!');
+            $mail->addData('email.name', $this->name);
+            $mail->addData('coupon', $code);
+            $mail->send();
+            return $code;
+            // Add Coupon code to users notes
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function checkSession() {
+        if((!isset($_COOKIE['session_id']) || $_COOKIE['session_id'] != $this->last_session)) {
+            if($this->last_session != '0') {
+                throw new Exception('You have been logged out because you haved logged in to GogoTraining from a different location.');
+            }
+        }
+    }
+
+
+    /*** Cart ***/
+    public function getCart() {
+        if(!isset($this->cart)) {
+            $this->cart = new Cart();
+        }
+        return $this->cart;
+    }
+
+    /*** Gopass ***/
+    public function getGopass() {
+        global $db, $user;
+        if(!$this->isLoggedin()) return false;
+        if(!isset($this->gopass)) {
+            $gopasses = $this->getGopassPurchases();
+            if(empty($gopasses)) { // No gopasses
+                $this->gopass = false;
+                return $this->gopass;
+            }
+            if(count($gopasses) == 1) { // Only one gopass
+                $this->gopass = current($gopasses);
+                return $this->gopass;
+            }
+
+            // Compare Gopasses and select the best one
+
+            // Check first for expired Gopasses
+            $non_expired_gopasses = array();
+            foreach($gopasses as $gopass) {
+                if($gopass->getExpirationDate()) {
+                    if(!$gopass->isExpired()) {
+                        $non_expired_gopasses[] = $gopass;
+                    }
+                } else {
+                    $non_expired_gopasses[] = $gopass;
+                }
+            }
+            if(count($non_expired_gopasses) == 1) { // Only one non-expired
+                $this->gopass = current($non_expired_gopasses);
+                return $this->gopass;
+            }
+            if(!empty($non_expired_gopasses)) {
+                $gopasses = $non_expired_gopasses;
+            }
+
+            // Check access level next
+            $best_access_level_gopasses = array();
+            foreach($gopasses as $gopass) { // Will need to modify if multiple access levels are created
+                if($gopass->getId() == 2) { // For now, 2 is the best
+                    $best_access_level_gopasses[] = $gopass;
+                }
+            }
+            if(count($best_access_level_gopasses) == 1) { // Only one non-expired
+                $this->gopass = current($best_access_level_gopasses);
+                return $this->gopass;
+            }
+            if(!empty($best_access_level_gopasses)) {
+                $gopasses = $best_access_level_gopasses;
+            }
+
+            // Check course type next
+            $best_course_type = false;
+            foreach($gopasses as $gopass) { // First, find best course type
+                $purchase_option_data = $gopass->getPurchaseOptionData();
+                $course_type = $purchase_option_data['course_type'];
+                if(!$best_course_type) {
+                    $best_course_type = $course_type;
+                } else {
+                    if($course_type < $best_course_type) {
+                        $best_course_type = $course_type;
+                    }
+                }
+            }
+            $best_course_type_gopasses = array();
+            foreach($gopasses as $gopass) { // Add all courses with best course type
+                $purchase_option_data = $gopass->getPurchaseOptionData();
+                if($purchase_option_data['course_type'] == $best_course_type) {
+                    $best_course_type_gopasses[] = $gopass;
+                }
+            }
+            if(count($best_course_type_gopasses) == 1) { // Only one with best course type
+                $this->gopass = current($best_course_type_gopasses);
+                return $this->gopass;
+            }
+            if(!empty($best_course_type_gopasses)) {
+                $gopasses = $best_course_type_gopasses;
+            }
+
+            // At this point it doesn't matter which one
+            $this->gopass = current($gopasses);
+            return $this->gopass;
+        }
+        return $this->gopass;
+    }
+    public function hasGopass() {
+        $gopass = $this->getGopass();
+        if(!$gopass) return false;
+        if($gopass->isExpired()) return false;
+        return true;
+    }
+    public function hasGopassEvenExpired() {
+        $gopass = $this->getGopass();
+        if(!$gopass) return false;
+        return true;
+    }
+
+    /*** Materials ***/
+    public function hasMaterials($id) {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'materials' AND
+                    type_id = ? AND
+                    UserID = ?  AND
+                    status != 0 AND
+                    site = ?";
+        $result = $db->read($sql, array($id, $this->id, GG_SITE));
+        if($result) return true;
+        else return false;
+    }
+
+    /*** Courses ***/
+    public function getCoursePurchase($id) {
+        if(!isset($this->course_purchases)) {
+            $available_courses = array();
+            $courses = $this->getIndividualCoursePurchases();
+            foreach($courses as $course) {
+                if(!isset($available_courses[$course->getItemObject()->id])) {
+                    $available_courses[$course->getItemObject()->id] = array();
+                }
+                $available_courses[$course->getItemObject()->id][] = array(
+                    'id' => $course->getPurchaseId(),
+                    'expiration_date' => $course->getExpirationDate(),
+                    'course_type' => $course->getCourseType()
+                );
+            }
+            $packages = $this->getPackagePurchases();
+            foreach($packages as $package) {
+                $courses = $package->getCoursePurchaseItems();
+                foreach($courses as $course) {
+                    if(!isset($available_courses[$course->getItemObject()->id])) {
+                        $available_courses[$course->getItemObject()->id] = array();
+                    }
+                    $available_courses[$course->getItemObject()->id][] = array(
+                        'id' => $course->getPurchaseId(),
+                        'expiration_date' => $course->getExpirationDate(),
+                        'course_type' => $course->getCourseType()
+                    );
+                }
+            }
+            // Loop through all and add best to purchased set
+            $this->course_purchases = array();
+            foreach($available_courses as $course_id => $courses_to_check) {
+                $courses = $courses_to_check;
+                if(count($courses) == 1) {
+                    $this->course_purchases[$course_id] = $courses[0];
+                } else {
+                    // Check first for expired courses
+                    $non_expired_courses = array();
+                    foreach($courses as $course) {
+                        if($course['expiration_date']) {
+                            if(strtotime($course['expiration_date']) > strtotime('now')) {
+                                $non_expired_courses[] = $course;
+                            }
+                        } else {
+                            $non_expired_courses[] = $course;
+                        }
+                    }
+                    if(count($non_expired_courses) == 1) { // Only one non-expired
+                        $this->course_purchases[$course_id] = $non_expired_courses[0];
+                        continue;
+                    }
+                    if(!empty($non_expired_courses)) {
+                        $courses = $non_expired_courses;
+                    }
+
+                    // Check course type next
+                    $best_course_type = false;
+                    foreach($courses as $course) { // First, find best course type
+                        if(!$best_course_type) {
+                            $best_course_type = $course['course_type'];
+                        } else {
+                            if($course['course_type'] < $best_course_type) {
+                                $best_course_type = $course['course_type'];
+                            }
+                        }
+                    }
+                    $best_course_type_courses = array();
+                    foreach($courses as $course) { // Add all courses with best course type
+                        if($course['course_type'] == $best_course_type) {
+                            $best_course_type_courses[] = $course;
+                        }
+                    }
+                    if(count($best_course_type_courses) == 1) { // Only one with best course type
+                        $this->course_purchases[$course_id] = current($best_course_type_courses);
+                        continue;
+                    }
+                    if(!empty($best_course_type_courses)) {
+                        $courses = $best_course_type_courses;
+                    }
+
+                    // At this point it doesn't matter which one
+                    $this->course_purchases[$course_id] = current($courses);
+                }
+            }
+        }
+        if(!isset($this->course_purchases[$id])) {
+            return false;
+        }
+        return $this->course_purchases[$id];
+    }
+    public function hasCourse($id) {
+        global $db;
+        if(!$this->isLoggedIn()) return false;
+        $purchase = $this->getCoursePurchase($id);
+        if($purchase) {
+            $item = Item::factoryByPurchaseId($purchase['id']);
+            // They have an active, unexpired course for this id
+            if($item->getStatus() == 1 && !$item->isExpired()) {
+                return true;
+            }
+        }
+        if($this->hasGopass()) {
+            $gopass = $this->getGopass();
+            if($gopass->isExpired()) return false;
+            $gopass_object = $gopass->getItemObject();
+            return !$gopass_object->isCourseExcluded($id);
+        }
+        return false;
+    }
+    public function hasCourseEvenExpired($id) {
+        if($this->hasGopassEvenExpired()) {
+            $gopass = $this->getGopass()->getItemObject();
+            return !$gopass->isCourseExcluded($id);
+        }
+        if(!$this->isLoggedin()) return false;
+
+        $purchase = $this->getCoursePurchase($id);
+        if(!$purchase) {
+            return false;
+        } else {
+            $item = Item::factoryByPurchaseId($purchase['id']);
+            return $item->getStatus() != 0;
+        }
+    }
+    public function hasCoursePending($id) {
+        $purchase = $this->getCoursePurchase($id);
+        if($purchase) {
+            $item = Item::factoryByPurchaseId($purchase['id']);
+            return $item->getStatus() == 2;
+        } else {
+            return false;
+        }
+    }
+    public function checkCourseType($id, $types_to_check) {
+        $purchase = $this->getCoursePurchase($id);
+        if($purchase) {
+            $item = Item::factoryByPurchaseId($purchase['id']);
+            if($item->getStatus() != Item::DELETED) {
+                return $item->checkCourseType($types_to_check);
+            }
+        }
+        // Check Gopass
+        if($gopass = $this->getGopass()) {
+            return $gopass->checkCourseType($types_to_check);
+        }
+    }
+    public function getCoursePurchaseType($id) {
+        $purchase = $this->getCoursePurchase($id);
+        if($purchase) {
+            return $purchase['course_type'];
+        }
+        if($this->hasGopassEvenExpired()) {
+            $gopass = $this->getGopass()->getGopassItem();
+            return $gopass->getCourseType();
+        }
+        return false;
+    }
+
+    /**** Permissions ****/
+    public function canViewVideos($id) {
+        if(!$this->isLoggedin()) return false;
+
+        $_course = new Course($id);
+        if($_course->status == Course::RETIRED) return true;
+
+        return $this->hasCourse($id);
+    }
+    public function canViewMaterials($id) {
+        if(!$this->isLoggedIn()) return false;
+        $course = new Course($id);
+        if($course->status == Course::RETIRED) return true;
+        if(!$this->hasCourse($id)) return false;
+        if($this->checkCourseType($id, array(1,2))) return true;
+        return false;
+    }
+    public function canViewTranscript($id) {
+        if(!$this->isLoggedIn()) return false;
+        $course = new Course($id);
+        if($course->status == Course::RETIRED) return true;
+        if(!$this->hasCourseEvenExpired($course->id)) return false;
+        if($this->checkCourseType($id, array(1,2))) return true;
+        return false;
+    }
+    public function canViewCompletionCertificate($id) {
+        if(!$this->isLoggedIn()) return false;
+        $course = new Course($id);
+        if($course->status == Course::RETIRED) return true;
+        if(!$this->hasCourseEvenExpired($course->id)) return false;
+        if($this->checkCourseType($id, array(1,2))) return true;
+        return false;
+    }
+    public function canViewQA($id) {
+        $course = new Course($id);
+        if(!$course->can_comment) return false;
+        if(!$this->hasCourse($id)) return false;
+        if($course->status == Course::COMINGSOON) return false;
+        if($this->checkCourseType($id, array(1))) return true;
+        return false;
+    }
+    public function canViewModule($id) {
+        $module = new Module($id);
+        $course = new Course($module->course_id);
+        if(!$module->type == 'video') return false;
+        if($course->isActive() && $module->is_preview) return true;
+        if($course->isHidden() && $module->is_preview) return true;
+        if($this->isLoggedIn() && $course->status == Course::RETIRED) return true;
+        if($this->hasCourse($module->course_id)) return true;
+        return false;
+    }
+    public function canPurchaseCourse($id) {
+        $course = new Course($id);
+        if(!$course->canBePurchased()) return false;
+
+        // if you already have it, you can't purchase it again
+        return !$this->hasCourse($id);
+    }
+
+
+    /*** Transcripts ***/
+    public function getTranscript($id) {
+        $user_progress = Userprogress::getUserprogress($this->id, 'course', $id);
+        return $user_progress->getWatchData();
+    }
+    public function getModuleTranscript($id) {
+        $user_progress = Userprogress::getUserprogress($this->id, 'module', $id);
+        return $user_progress->getWatchData();
+    }
+    public function getAllViewedCourses() {
+        global $db;
+        $sql = "SELECT gogogh_courses.id AS id, gogogh_courses.title AS title
+                FROM log
+                JOIN gogogh_courses_modules ON gogogh_courses_modules.id = log.TypeID
+                JOIN gogogh_courses ON gogogh_courses.id = gogogh_courses_modules.course_id
+                WHERE
+                    log.UserID = ? AND
+                    log.site = ? AND
+                    Type = 'gogogh_module_view'
+                GROUP BY gogogh_courses.id
+                ORDER BY gogogh_courses.title ASC";
+        $courses = $db->read($sql, array($this->id, GG_SITE));
+        return $courses;
+    }
+
+    /*** Purchases ***/
+    public function getPurchases() {
+        $purchases = array(
+            'packages' => $this->getPackagePurchases(),
+            'courses' => $this->getIndividualCoursePurchases(),
+            'materials' => $this->getMaterialsPurchases(),
+            'bundles' => $this->getBundlesPurchases()
+        );
+        return $purchases;
+    }
+    public function hasPurchases() {
+        $packages = $this->getPackagePurchases();
+        $courses = $this->getIndividualCoursePurchases();
+        $materials = $this->getMaterialsPurchases();
+        $gopass = $this->hasGopass();
+        $vouchers = $this->FreeCourses;
+        return !empty($packages) || !empty($courses) || !empty($materials) || !$gopass || !$vouchers;
+    }
+    public function getIndividualCoursePurchases() {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'course' AND
+                    status != 0 AND
+                    UserID = ?  AND
+                    (coupon NOT LIKE 'PACKAGE-%' OR coupon IS NULL) AND
+                    site = ?
+                ORDER BY date DESC";
+        $purchases = $db->read($sql, array($this->id, GG_SITE));
+        $courses = array();
+        foreach($purchases as $purchase) {
+            $courses[] = Item::factoryByPurchaseId($purchase['id']);
+        }
+        return $courses;
+    }
+    public function getGopassPurchases() {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'gopass' AND
+                    UserID = ? AND
+                    status != 0 AND
+                    site = ?
+                ORDER BY date DESC";
+        $purchases = $db->read($sql, array($this->id, GG_SITE));
+        $gopasses = array();
+        foreach($purchases as $purchase) {
+            $gopasses[] = Item::factoryByPurchaseId($purchase['id']);
+        }
+        return $gopasses;
+    }
+    public function getPackagePurchases() {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'package' AND
+                    status != 0 AND
+                    UserID = ? AND
+                    site = ?
+                ORDER BY date DESC";
+        $purchases = $db->read($sql, array($this->id, GG_SITE));
+        $packages = array();
+        foreach($purchases as $purchase) {
+            $packages[] = Item::factoryByPurchaseId($purchase['id']);
+        }
+        return $packages;
+    }
+    public function getMaterialsPurchases() {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'materials' AND
+                    status != 0 AND
+                    UserID = ? AND
+                    site = ?
+                ORDER BY date DESC";
+        $purchases = $db->read($sql, array($this->id, GG_SITE));
+        $materials = array();
+        foreach($purchases as $purchase) {
+            $materials[] = Item::factoryByPurchaseId($purchase['id']);
+        }
+        return $materials;
+    }
+    public function getBundlesPurchases() {
+        global $db;
+        $sql = "SELECT id FROM user_purchases
+                WHERE
+                    type = 'bundle' AND
+                    status != 0 AND
+                    UserID = ? AND
+                    site = ?
+                ORDER BY date DESC";
+        $purchases = $db->read($sql, array($this->id, GG_SITE));
+        $bundles = array();
+        foreach($purchases as $purchase) {
+            $bundles[] = Item::factoryByPurchaseId($purchase['id']);
+        }
+        return $bundles;
+    }
+    public function getSubscription() {
+        if(!isset($this->subscription)) {
+            $this->subscription = Subscription::getSubscriptionByUserId($this->id);
+        }
+        return $this->subscription;
+    }
+
+    /*** Helpers ***/
+    public function getLeadinfo() {
+        $lead_info = array();
+        $lead_info['first_name'] = substr($this->name, 0, strpos($this->name, ' '));
+        $lead_info['last_name'] = substr($this->name, strpos($this->name, ' ') + 1);
+        $lead_info['email_address'] = $this->Email;
+        $lead_info['phone'] = $this->Phone;
+        $lead_info['job_title'] = $this->CompanyTitle;
+        return $lead_info;
+    }
+    public function getProfileImg() {
+        global $db;
+        $sql = "SELECT ImageFile FROM images WHERE UserID = ? AND isDefault = 1";
+        $photo = $db->read($sql, array($this->id), GGDB::FETCH_SCALER);
+        if(!empty($photo)) {
+            if(is_file(GG_MEDIA_ROOT."/photos/{$this->id}/{$photo}")) {
+                $src = "/media/photos/{$this->id}/$photo";
+            } else {
+                $src = "/files/$photo/";
+            }
+        } else {
+            $src = false;
+        }
+        return $src;
+    }
+    public function profileUrl() {
+        return $this->generateUrl($this->id, $this->name);
+    }
+    public static function profileUrlById($id) {
+        global $db;
+        $sql = "SELECT IF(isCompany=1,Company,Name) AS name FROM user WHERE UserID = ?";
+        $name = $db->read($sql, array($id), GGDB::FETCH_SCALER);
+        return self::generateUrl($id, $name);
+    }
+    public static function generateUrl($id, $name) {
+        $url_name = strtolower($name);
+        $url_name = str_replace(' ','-',$url_name);
+        $url_name = preg_replace('/[^a-zA-Z0-9_-]/','',$url_name);
+        return "/user/{$id}/$url_name/";
+    }
+    public function isLoggedin() {
+        return $this->id != 0;
+    }
+    public function isLoggedinAsAdmin() {
+        return !empty($_SESSION['is_logged_in']);
+    }
+    public static function removeUserDirectories($userid) {
+        self::recursiveRemoveDirectory(GG_MEDIA_ROOT."/photos/".$userid);
+        self::recursiveRemoveDirectory(GG_MEDIA_ROOT."/resume/".$userid);
+    }
+    public static function recursiveRemoveDirectory($directory) {
+        if(substr($directory,-1) == '/') {
+            $directory = substr($directory,0,-1);
+        }
+        if(!file_exists($directory) || !is_dir($directory)) {
+            return false;
+        } else if(is_readable($directory)) {
+            $handle = opendir($directory);
+            while (false !== ($item = readdir($handle))) {
+                if($item != '.' && $item != '..') {
+                    $path = $directory.'/'.$item;
+                    if(is_dir($path)) {
+                        self::recursiveRemoveDirectory($path);
+                    } else {
+                        unlink($path);
+                    }
+                }
+            }
+            closedir($handle);
+            if($empty == false) {
+                if(!rmdir($directory)) {
+                    return false;
+                }
+            }
+        }
+    }
+}

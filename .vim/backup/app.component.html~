@@ -1,0 +1,771 @@
+<div class="center container-fluid">
+    <div [hidden]="isMobile" class="rate-app row">
+        <div class="rate-app-form rate-app-sidebar col-sm-4">
+            <div class="rate-app-quote-form col-sm-4">
+                <h2>Get an Instant Mortgage Rate Quote</h2>
+                <form>
+                    <label>Loan Purpose</label>
+                    <macu-dropdown
+                        [values]="inputs.loanPurpose.values"
+                        [disabled]="inputs.loanPurpose.disabled"
+                        (valueSet)="setDropdown('loanPurpose', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('loanPurpose')"
+                        class="macu-invalid-text">
+                        {{ inputs.loanPurpose.invalidText }}
+                    </div>
+                    <label>Loan Type</label>
+                    <macu-dropdown
+                        [values]="inputs.loanProduct.values"
+                        [disabled]="inputs.loanProduct.disabled"
+                        (valueSet)="setDropdown('loanProduct', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('loanProduct')"
+                        class="macu-invalid-text">
+                        {{ inputs.loanProduct.invalidText }}
+                    </div>
+                    <label>State</label>
+                    <macu-dropdown
+                        [values]="inputs.state.values"
+                        [disabled]="inputs.state.disabled"
+                        (valueSet)="setDropdown('state', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('state')"
+                        class="macu-invalid-text">
+                        {{ inputs.state.invalidText }}
+                    </div>
+                    <label>County</label>
+                    <macu-dropdown
+                        [values]="inputs.county.values"
+                        [disabled]="inputs.county.disabled"
+                        (valueSet)="setDropdown('county', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('county')"
+                        class="macu-invalid-text">
+                        {{ inputs.county.invalidText }}
+                    </div>
+                    <label>Credit Score</label>
+                    <macu-dropdown
+                        [values]="inputs.creditScore.values"
+                        [disabled]="inputs.creditScore.disabled"
+                        (valueSet)="setDropdown('creditScore', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('creditScore')"
+                        class="macu-invalid-text">
+                        {{ inputs.creditScore.invalidText }}
+                    </div>
+                    <label>Property Type</label>
+                    <macu-dropdown
+                        [values]="inputs.propertyType.values"
+                        [disabled]="inputs.propertyType.disabled"
+                        (valueSet)="setDropdown('propertyType', $event)">
+                    </macu-dropdown>
+                    <div
+                        [hidden]="validate('propertyType')"
+                        class="macu-invalid-text">
+                        {{ inputs.propertyType.invalidText }}
+                    </div>
+                    <label>Loan Amount</label>
+                    <input
+                        type="text"
+                        [(ngModel)]="inputs.loanAmount.currentValue"
+                        placeholder="{{ inputs.loanAmount.hint }}">
+                    <label>Property Value</label>
+                    <input
+                        type="text"
+                        [(ngModel)]="inputs.propertyValue.currentValue"
+                        placeholder="{{ inputs.propertyValue.hint }}">
+                    <button
+                        (click)="switchPage(true)"
+                        class="rate-app-button rate-app-button-primary">
+                        Get Rates
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="rate-app-main col-sm-8">
+            <div [hidden]="currentPage != 'home'" class="rate-app-main-home">
+                <h2>Three Easy Steps</h2>
+                <div class="rate-app-steps row">
+                    <div class="rate-app-step step-1 col-sm-4">
+                        <span></span>
+                        Answer a Few Questions
+                    </div>
+                    <div class="rate-app-step step-2 col-sm-4">
+                        <span></span>
+                        View Quotes, Change Criteria, Make Decisions
+                    </div>
+                    <div class="rate-app-step step-3 col-sm-4">
+                        <span></span>
+                        Email Details or Take your First Steps &amp; Apply
+                    </div>
+                </div>
+            </div>
+            <div [hidden]="currentPage != 'loading'" class="rate-app-main-loading">
+                <div class="rate-app-home-gif">
+                    <img src="images/icon-house.gif">
+                </div>
+                <h2>Loading...</h2>
+            </div>
+            <div [hidden]="currentPage != 'detail'" class="rate-app-main-rate">
+                <div
+                    @houseState="animationState.house"
+                    class="rate-app-home-icon"></div>
+                <div @pageState="animationState.page" class="rate-app-main-content">
+                    <h2>Your Rate Options</h2>
+                    <p class="rate-date">{{ date | date:'MM.dd.yy hh:mm a' }}</p>
+                    <p class="rate-introduction">
+                        Choose your rate, payment or total cost and see how they affect each other
+                    </p>
+                    <div class="rate-options">
+                        <div class="rate-options-tabs row">
+                            <div
+                                *ngFor="let loanType of loanTypes"
+                                [class.col-sm-2]="loanTypes.length == 6"
+                                [class.col-sm-15]="loanTypes.length == 5"
+                                [class.col-sm-4]="loanTypes.length == 3"
+                                [class.col-sm-3]="loanTypes.length == 4"
+                                [class.col-sm-6]="loanTypes.length == 2"
+                                [class.active]="currentLoanType == loanType"
+                                (click)="switchTab(loanType)"
+                                class="rate-options-tab col-sm-15">
+                                <strong>{{loanType.length}}</strong>
+                                {{loanType.type}}
+                            </div>
+                        </div>
+                        <div class="rate-options-content row">
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Payment</h3>
+                                <p>{{ currentLoanType?.currentOption?.payment | moneyFormat }}</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.payment"
+                                    [selectionType]="'payment'"
+                                    [range]="currentLoanType?.payments"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Rate</h3>
+                                <p>{{ currentLoanType?.currentOption?.rate }}%</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.rate"
+                                    [selectionType]="'rate'"
+                                    [range]="currentLoanType?.rates"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Total Cost</h3>
+                                <p>{{ getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.total"
+                                    [selectionType]="'total'"
+                                    [range]="currentLoanType?.totals"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-summary row">
+                        <div class="col-xs-12">
+                            <h2>Loan Summary</h2>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Points</h3>
+                            <p>{{currentLoanType?.currentOption?.points}}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>APR</h3>
+                            <p>{{currentLoanType?.currentOption?.Apr}}%</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan to Value</h3>
+                            <p>{{ getLoanToValue() }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Purpose</h3>
+                            <p>{{ getInputValueById('loanPurpose', inputs.loanPurpose.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Amount</h3>
+                            <p>{{ inputs.loanAmount.currentValue | moneyFormat }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>State</h3>
+                            <p>{{ getInputValueById('state', inputs.state.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Program</h3>
+                            <p>{{currentLoanType?.currentOption?.ProductName}}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Property Type</h3>
+                            <p>{{ getInputValueById('propertyType', inputs.propertyType.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Property Value</h3>
+                            <p>{{ inputs.propertyValue.currentValue | moneyFormat }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Lock Period</h3>
+                            <p>{{ currentLoanType?.currentOption?.LockPeriod }} days</p>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-costs row">
+                        <div class="col-xs-12">
+                            <h2>Closing Costs</h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Lender Fees</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Processing Fee</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Points of Lender Credit</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getPointsOfLenderFee() | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Lender Fees</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Other Items Due at Closing</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Interest for partial month</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Home owner's insurance</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Property taxes</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Estimated Third-Party Costs</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Appraisal</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Appraisal Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Credit Report</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Credit Report Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Title Fees</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.titleFees | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Estimated Third Party Costs</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.totalThirdParty | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Estimated Closing Costs</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.totalThirdParty + getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rate-app-button-set row">
+                            <button
+                                class="rate-app-button rate-app-button-primary">
+                                Apply Now
+                            </button>
+                            <button
+                                class="rate-app-button rate-app-button-secondary">
+                                Email Details
+                            </button>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-email row">
+                        <h2>Not the Rate You're Looking For?</h2>
+                        <p>We can contact you when the rate you're looking for is reached.</p>
+                        <div class="rate-app-form">
+                            <form>
+                                <fieldset>
+                                    <label>Name</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.name.currentValue"
+                                        placeholder="{{ inputs.name.hint }}">
+                                    <label>Email</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.email.currentValue"
+                                        placeholder="{{ inputs.email.hint }}">
+                                    <label>Loan Amount</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.loanAmount.currentValue"
+                                        placeholder="{{ inputs.loanAmount.hint }}">
+                                    <label>Loan Type</label>
+                                    <macu-dropdown
+                                        [values]="inputs.loanPurpose.values"
+                                        [disabled]="inputs.loanPurpose.disabled"
+                                        (valueSet)="setDropdown('loanPurpose', $event)">
+                                    </macu-dropdown>
+                                    <label>Target Rate</label>
+                                    <macu-dropdown
+                                        [values]="inputs.targetRate.values"
+                                        [disabled]="inputs.targetRate.disabled"
+                                        (valueSet)="setDropdown('targetRate', $event)">
+                                    </macu-dropdown>
+                                    <label>Target Points</label>
+                                    <macu-dropdown
+                                        [values]="inputs.targetPoints.values"
+                                        [disabled]="inputs.targetPoints.disabled"
+                                        (valueSet)="setDropdown('targetPoints', $event)">
+                                    </macu-dropdown>
+                                </fieldset>
+                                <div class="rate-app-button-set">
+                                    <button
+                                        class="rate-app-button rate-app-button-secondary">
+                                        Email Details
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-footer row">
+                        <div class="col-sm-6">
+                            <h2>Meet with a Mortgage Specialist Today</h2>
+                            <button class="rate-app-button rate-app-button-primary">
+                                Schedule Appointment Now
+                            </button>
+                        </div>
+                        <div class="col-sm-6">
+                            <h2>Loan Summary</h2>
+                            <ul>
+                                <li>Pay your mortgage locally at a branch</li>
+                                <li>Quick Close paperless closing available</li>
+                                <li>Low Mortgage insurance</li>
+                                <li>Loan services throuh Mountain America</li>
+                                <li>Competitive Interest Rates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--
+    <div [hidden]="!isMobile" class="rate-app rate-app-mobile row">
+        <div class="rate-app-main">
+            <div
+                @mobilePage="animationState.mobilePage"
+                class="rate-app-sidebar rate-app-form">
+                <div
+                    class="rate-app-mobile-home"
+                    @mobilePageHome="animationState.mobilePageHome"
+                    [hidden]="currentPage != 'home'">
+                    <h2>Get an Instant Mortgage Rate Quote</h2>
+                    <form>
+                        <label>Loan Purpose</label>
+                        <macu-dropdown
+                            [values]="inputs.loanPurpose.values"
+                            [disabled]="inputs.loanPurpose.disabled"
+                            (valueSet)="setDropdown('loanPurpose', $event)">
+                        </macu-dropdown>
+                        <label>Loan Type</label>
+                        <macu-dropdown
+                            [values]="inputs.loanProduct.values"
+                            [disabled]="inputs.loanProduct.disabled"
+                            (valueSet)="setDropdown('loanProduct', $event)">
+                        </macu-dropdown>
+                        <label>State</label>
+                        <macu-dropdown
+                            [values]="inputs.state.values"
+                            [disabled]="inputs.state.disabled"
+                            (valueSet)="setDropdown('state', $event)">
+                        </macu-dropdown>
+                        <label>County</label>
+                        <macu-dropdown
+                            [values]="inputs.county.values"
+                            [disabled]="inputs.county.disabled"
+                            (valueSet)="setDropdown('county', $event)">
+                        </macu-dropdown>
+                        <label>Credit Score</label>
+                        <macu-dropdown
+                            [values]="inputs.creditScore.values"
+                            [disabled]="inputs.creditScore.disabled"
+                            (valueSet)="setDropdown('creditScore', $event)">
+                        </macu-dropdown>
+                        <label>Property Type</label>
+                        <macu-dropdown
+                            [values]="inputs.propertyType.values"
+                            [disabled]="inputs.propertyType.disabled"
+                            (valueSet)="setDropdown('propertyType', $event)">
+                        </macu-dropdown>
+                        <label>Loan Amount</label>
+                        <input
+                            type="text"
+                            [(ngModel)]="inputs.loanAmount.currentValue"
+                            placeholder="{{ inputs.loanAmount.hint }}">
+                        <label>Property Value</label>
+                        <input
+                            type="text"
+                            [(ngModel)]="inputs.propertyValue.currentValue"
+                            placeholder="{{ inputs.propertyValue.hint }}">
+                        <button
+                            (click)="switchPage(true)"
+                            class="rate-app-button rate-app-button-primary">
+                            Get Rates
+                        </button>
+                    </form>
+                </div>
+                <div
+                    [hidden]="currentPage == 'home'"
+                    @mobilePageBack="animationState.mobilePageBack"
+                    class="rate-app-mobile-back">
+                    <h2>Mortgage RAte Quote</h2>
+                    <button
+                        (click)="switchPage(false)"
+                        class="rate-app-button rate-app-button-primary">
+                        Change Criteria
+                    </button>
+                </div>
+            </div>
+            <div [hidden]="currentPage != 'loading'" class="rate-app-main-loading">
+                <div class="rate-app-home-gif">
+                    <img src="images/icon-house.gif">
+                </div>
+                <h2>Loading...</h2>
+            </div>
+            <div [hidden]="currentPage != 'detail'" class="rate-app-main-rate">
+                <div
+                    @houseState="animationState.house"
+                    class="rate-app-home-icon"></div>
+                <div @pageState="animationState.page" class="rate-app-main-content">
+                    <h2>Your Rate Options</h2>
+                    <p class="rate-date">{{ date | date:'MM.dd.yy hh:mm a' }}</p>
+                    <p class="rate-introduction">
+                        Choose your rate, payment or total cost and see how they affect each other
+                    </p>
+                    <div class="rate-options">
+                        <div class="rate-options-tabs row">
+                            <div
+                                *ngFor="let loanType of loanTypes"
+                                [class.col-sm-2]="loanTypes.length == 6"
+                                [class.col-sm-15]="loanTypes.length == 5"
+                                [class.col-sm-4]="loanTypes.length == 3"
+                                [class.col-sm-3]="loanTypes.length == 4"
+                                [class.col-sm-6]="loanTypes.length == 2"
+                                [class.active]="currentLoanType == loanType"
+                                (click)="switchTab(loanType)"
+                                class="rate-options-tab col-sm-15">
+                                <strong>{{loanType.length}}</strong>
+                                {{loanType.type}}
+                            </div>
+                        </div>
+                        <div class="rate-options-content row">
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Payment</h3>
+                                <p>{{ currentLoanType?.currentOption?.payment | moneyFormat }}</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.payment"
+                                    [selectionType]="'payment'"
+                                    [range]="currentLoanType?.payments"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Rate</h3>
+                                <p>{{ currentLoanType?.currentOption?.rate }}%</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.rate"
+                                    [selectionType]="'rate'"
+                                    [range]="currentLoanType?.rates"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                            <div class="rate-options-sliders col-sm-4">
+                                <h3>Total Cost</h3>
+                                <p>{{ getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                <macu-slider
+                                    [value]="currentLoanType?.currentOption?.total"
+                                    [selectionType]="'total'"
+                                    [range]="currentLoanType?.totals"
+                                    (sliderChange)="switchOption($event)">
+                                </macu-slider>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-summary row">
+                        <div class="col-xs-12">
+                            <h2>Loan Summary</h2>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Points</h3>
+                            <p>{{currentLoanType?.currentOption?.points}}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>APR</h3>
+                            <p>{{currentLoanType?.currentOption?.Apr}}%</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan to Value</h3>
+                            <p>{{ getLoanToValue() }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Purpose</h3>
+                            <p>{{ getInputValueById('loanPurpose', inputs.loanPurpose.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Amount</h3>
+                            <p>{{ inputs.loanAmount.currentValue | moneyFormat }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>State</h3>
+                            <p>{{ getInputValueById('state', inputs.state.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Loan Program</h3>
+                            <p>{{currentLoanType?.currentOption?.ProductName}}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Property Type</h3>
+                            <p>{{ getInputValueById('propertyType', inputs.propertyType.currentValue) }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Property Value</h3>
+                            <p>{{ inputs.propertyValue.currentValue | moneyFormat }}</p>
+                        </div>
+                        <div class="rate-app-summary-item col-md-15 col-xs-6">
+                            <h3>Lock Period</h3>
+                            <p>{{ currentLoanType?.currentOption?.LockPeriod }} days</p>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-costs row">
+                        <div class="col-xs-12">
+                            <h2>Closing Costs</h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Lender Fees</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Processing Fee</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Points of Lender Credit</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getPointsOfLenderFee() | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Lender Fees</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Other Items Due at Closing</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Interest for partial month</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Home owner's insurance</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Property taxes</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rate-app-costs-block">
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <h3>Estimated Third-Party Costs</h3>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Appraisal</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Appraisal Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Credit Report</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ getFeeByName('Credit Report Fee') | moneyFormat }}</p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <p>Title Fees</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.titleFees | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Estimated Third Party Costs</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.totalThirdParty | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="rate-app-total-row row">
+                                        <div class="col-sm-8">
+                                            <p>Total Estimated Closing Costs</p>
+                                        </div>
+                                        <div class="col-sm-4 rate-app-totals">
+                                            <p>{{ currentLoanType?.currentOption?.totalThirdParty + getPointsOfLenderFee() + getFeeByName('Processing Fee') | moneyFormat }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rate-app-button-set row">
+                            <button
+                                class="rate-app-button rate-app-button-primary">
+                                Apply Now
+                            </button>
+                            <button
+                                class="rate-app-button rate-app-button-secondary">
+                                Email Details
+                            </button>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-email row">
+                        <h2>Not the Rate You're Looking For?</h2>
+                        <p>We can contact you when the rate you're looking for is reached.</p>
+                        <div class="rate-app-form">
+                            <form>
+                                <fieldset>
+                                    <label>Name</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.name.currentValue"
+                                        placeholder="{{ inputs.name.hint }}">
+                                    <label>Email</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.email.currentValue"
+                                        placeholder="{{ inputs.email.hint }}">
+                                    <label>Loan Amount</label>
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="inputs.loanAmount.currentValue"
+                                        placeholder="{{ inputs.loanAmount.hint }}">
+                                    <label>Loan Type</label>
+                                    <macu-dropdown
+                                        [values]="inputs.loanPurpose.values"
+                                        [disabled]="inputs.loanPurpose.disabled"
+                                        (valueSet)="setDropdown('loanPurpose', $event)">
+                                    </macu-dropdown>
+                                    <label>Target Rate</label>
+                                    <macu-dropdown
+                                        [values]="inputs.targetRate.values"
+                                        [disabled]="inputs.targetRate.disabled"
+                                        (valueSet)="setDropdown('targetRate', $event)">
+                                    </macu-dropdown>
+                                    <label>Target Points</label>
+                                    <macu-dropdown
+                                        [values]="inputs.targetPoints.values"
+                                        [disabled]="inputs.targetPoints.disabled"
+                                        (valueSet)="setDropdown('targetPoints', $event)">
+                                    </macu-dropdown>
+                                </fieldset>
+                                <div class="rate-app-button-set">
+                                    <button
+                                        class="rate-app-button rate-app-button-secondary">
+                                        Email Details
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="rate-app-block rate-app-footer row">
+                        <div class="col-sm-6">
+                            <h2>Meet with a Mortgage Specialist Today</h2>
+                            <button class="rate-app-button rate-app-button-primary">
+                                Schedule Appointment Now
+                            </button>
+                        </div>
+                        <div class="col-sm-6">
+                            <h2>Loan Summary</h2>
+                            <ul>
+                                <li>Pay your mortgage locally at a branch</li>
+                                <li>Quick Close paperless closing available</li>
+                                <li>Low Mortgage insurance</li>
+                                <li>Loan services throuh Mountain America</li>
+                                <li>Competitive Interest Rates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
+</div>

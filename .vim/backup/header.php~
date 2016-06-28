@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+		<?php if(isset($p->title)): ?>
+			<?php if(GG_WP): ?>
+				<?= $p->title ?>
+			<?php else: ?>
+				<?= $p->title ?> | <?= GG_SITE_NAME ?>
+			<?php endif; ?>
+		<?php else: ?>
+			IT Training, Management Training, online E-learning, Certification
+			Courses and more! | <?= GG_SITE_NAME ?>
+		<?php endif; ?>
+    </title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8;">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="google-site-verification" content="4q0z8kDVifTUSa1qnqP3OLatn9clJc92WUU2sb9b2VU">
+    <meta name="coverage" content="Worldwide">
+    <meta name="distribution" content="Global">
+    <meta name="rating" content="general">
+    <meta name="robots" content="index">
+    <meta name="copyright" content="GogoTraining, Inc.">
+    <meta name="reply-to" content="creator@gogotraining.com">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="server-identity" content="<?php echo $_SERVER['SERVER_ADDR']; ?>">
+	<link href="/css/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link 
+		href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700,800"
+		rel="stylesheet"
+		type="text/css">
+	<?php if(GG_WP): ?>
+		<link rel="alternate" type="application/rss+xml" title="<?php bloginfo('name'); ?> RSS" href="<?php bloginfo('rss2_url'); ?>">
+		<link rel="pingback" href="<?php bloginfo('pingback_url'); ?>">
+		<?php if(is_singular()) wp_enqueue_script('comment-reply'); ?>
+		<?php wp_head(); ?>
+	<?php else: ?>
+		<meta name="description"
+			<?php if(isset($p->description)): ?>
+				content="<?= $p->description ?>"
+			<?php else: ?>
+				content="IT courses, training classes and online elearning in ITIL,
+					Android programming, iOS5, Google, Microsoft, Java, Linux, Device
+					Drivers, Oracle, SQL, APEX, Perl, Python, C+, USB, Windows 7 and more."
+			<?php endif; ?>>
+	<?php endif; ?>
+    <?php echo $p->metaTagsHtml(); ?>
+    <?php echo $p->cssHtml(); ?>
+    <?php if(isset($p->head_content)) echo $p->head_content; ?>
+    <script type="text/javascript">
+    var GLOBAL_UserID = <?= $user->id ?>;
+    </script>
+	<script type="text/javascript" src="/js/lib/modernizr.js"></script>
+</head>
+<body class="<?= $p->pageClass() ?>">
+<div class="container">
+<header class="header-desktop" data-component="header-shrink">
+	<div class="header-primary">
+		<?php include(GG_ROOT.'/includes/messages.inc.php') ?>
+		<a href="/" class="logo">
+			<img 
+				src="/images/<?= GG_LOGO ?>"
+				alt="GogoTraining - Leader in IT &amp; Management Training" />
+		</a>
+		<nav class="nav-primary">
+			<ul>
+				<?php include(GG_ROOT.'/includes/_nav-secondary.php') ?>
+			</ul>
+		</nav>
+		<nav class="nav-contact">
+			<ul>
+				<?php include(GG_ROOT.'/includes/_nav-contact.php') ?>
+			</ul>
+		</nav>
+		<?php if(!$user->isLoggedin()): ?>
+			<a 
+				class="free-course-link<?= ($p->pageClass() == 'page_index') ? ' expanded' : '' ?>"
+				href="/join/register.php"
+				data-action="overlay-register">
+				Get Started Today
+			</a>
+		<?php endif; ?>
+	</div>
+	<div class="header-secondary">
+		<nav class="nav-secondary">
+			<?php if($p->isAdminPage()): ?>
+				<ul>
+					<?php include(GG_ROOT.'/includes/_nav-admin.php') ?>
+				</ul>
+			<?php else: ?>
+				<ul>
+					<?php include(GG_ROOT.'/includes/_nav-primary.php') ?>
+					<?php if($user->isLoggedIn()): ?>
+						<?php include(GG_ROOT.'/includes/_nav-tertiary.php') ?>
+					<?php endif; ?>
+				</ul>
+			<?php endif; ?>
+		</nav>
+	</div>
+</header>
+<header class="header-mobile" data-component="drawer">
+	<a href="/" class="logo">
+		<img 
+			src="/images/<?= GG_LOGO ?>"
+			alt="GogoTraining - Leader in IT &amp; Management Training" />
+	</a>
+	<nav class="nav-primary" data-component="drawer">
+		<a class="menu" href="#" data-drawer="toggle"><span></span></a>
+		<ul data-drawer="content">
+			<?php include(GG_ROOT.'/includes/_nav-secondary.php') ?>
+			<?php include(GG_ROOT.'/includes/_nav-contact.php') ?>
+			<?php if($p->isAdminPage()): ?>
+				<?php include(GG_ROOT.'/includes/_nav-admin.php') ?>
+			<?php else: ?>
+				<?php if($user->isLoggedIn()): ?>
+					<?php include(GG_ROOT.'/includes/_nav-tertiary.php') ?>
+				<?php endif; ?>
+				<?php include(GG_ROOT.'/includes/_nav-primary.php') ?>
+			<?php endif; ?>
+			<?php include(GG_ROOT.'/includes/_nav-footer.php') ?>
+		</ul>
+	</nav>
+</header>

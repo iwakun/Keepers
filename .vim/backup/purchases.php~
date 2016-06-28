@@ -1,0 +1,234 @@
+<?php
+require_once('includes/boot.inc.php');
+// TODO: Add ability to manage purchases from this page (cancel gopass, renew courses, etc.)
+
+if(!$user->isLoggedin()) {
+	Notice::error("You must be logged in to view your purchases");
+	Page::redirect('/');
+}
+// Course Vouchers
+$vouchers = $user->FreeCourses;
+
+// Purchases
+$purchases = $user->getPurchases();
+
+// Subscription
+$subscription = $user->getSubscription();
+
+$p->title = 'My Purchases';
+$p->keywords = 'purchases';
+?><?php include(GG_ROOT.'/includes/header.php'); ?>
+<div class="main box-frame">
+    <h1>My Purchases</h1>
+    <?php if(!$user->isLoggedin()): ?>
+        <p>GogoTraining members can login to access this area.</p>
+    <?php endif; ?>
+
+	<?php if($user->hasPurchases()): ?>
+		<?php if($user->getGopass()): ?>
+			<?php $gopass = $user->getGopass(); ?>
+			<h2>Training Pass</h2>
+			<table class="table">
+				<tr>
+					<th>Training Pass</th>
+					<th>Expiration Date</th>
+				</tr>
+				<tr>
+					<td>
+						<?php echo $gopass->getName(); ?>
+					</td>
+					<td>
+						<?php if(
+							$gopass->getExpirationDate() == null ||
+							$gopass->getExpirationDate() == ''
+						): ?>
+							<?= $user->getGopass()->expiration_date ?>
+							No expiration
+						<?php elseif($gopass->isExpired()): ?>
+							<span style="color: red">
+								<?= date('m/d/Y', strtotime($gopass->getExpirationDate())) ?>
+							</span>
+						<?php elseif($gopass->getStatus() == Item::SUSPENDED): ?>
+							<span style="color: red">Suspended</span>
+						<?php else: ?>
+							<?= date('m/d/Y', strtotime($gopass->getExpirationDate())) ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+			</table>
+		<?php endif; ?> 
+
+		<?php if($vouchers): ?>
+			<h2>Course Vouchers</h2>
+			<table class="table">
+				<tr>
+					<th>Course Vouchers</th>
+				</tr>
+				<tr>
+					<td>Number of vouchers: <?= $vouchers ?></td>
+				</tr>
+			</table>
+		<?php endif; ?>
+		
+		<?php if(!empty($purchases['packages'])): ?>
+			<h2>Packages</h2>
+			<table class="table">
+				<colgroup>
+					<col width="75%" />
+					<col width="25%" />
+				</colgroup>
+				<tr class="super-heading">
+					<th>Course Name</th>
+					<th>Expiration Date</th>
+				</tr>
+				<?php foreach($purchases['packages'] as $package): ?>
+					<tr>
+						<th colspan="2">
+							<?= $package->getName() ?>
+							<small>(suggested order)</small>
+						</th>
+					</tr>
+					<?php foreach($package->getCoursePurchaseItems() as $course): ?>
+						<tr>
+							<td>
+								<a href="<?= $course->getItemObject()->getUrl() ?>">
+									<?= $course->getItemObject()->getTitle() ?>
+								</a>
+							</td>
+							<td>
+								<?php if($package->isSubscription()): ?>
+									subscription
+								<?php else: ?>
+									<?php if($package->getStatus() == Item::PENDING): ?>
+										Pending
+									<?php elseif($package->getStatus() == Item::SUSPENDED): ?>
+										<span style="color: red;">Suspended</span>
+									<?php else: ?>
+										<?php if($course->isExpired()): ?>
+											<span style="color: red;">
+												<?= date('m/d/Y', strtotime($course->getExpirationDate())) ?>
+											</span>
+										<?php else: ?>
+											<?= date('m/d/Y', strtotime($course->getExpirationDate())) ?>
+										<?php endif; ?>
+									<?php endif; ?>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
+			</table>
+		<?php endif; ?>
+
+		<?php if(!empty($purchases['courses'])): ?>
+			<h2>Courses</h2>
+			<table class="table">
+				<colgroup>
+					<col width="75%" />
+					<col width="25%" />
+				</colgroup>
+				<tr>
+					<th>Course Name</th>
+					<th>Expiration Date</th>
+				</tr>
+				<?php foreach($purchases['courses'] as $course): ?>
+					<tr>
+						<td>
+							<a href="<?= $course->getItemObject()->getUrl() ?>">
+								<?= $course->getItemObject()->getTitle() ?>
+							</a>
+						</td>
+						<td>
+							<?php if($course->getStatus() == Item::PENDING): ?>
+								Pending
+							<?php elseif($course->getStatus() == Item::SUSPENDED): ?>
+								<span style="color: red;">Suspended</span>
+							<?php else: ?>
+								<?php if($course->isExpired()): ?>
+									<span style="color: red;">
+										<?= date('m/d/Y', strtotime($course->getExpirationDate())) ?>
+									</span>
+								<?php else: ?>
+									<?= date('m/d/Y', strtotime($course->getExpirationDate())) ?>
+								<?php endif; ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</table>
+		<?php endif; ?>
+
+		<?php if(!empty($purchases['materials'])): ?>
+			<h2>Purchased Materials</h2>
+			<table class="table">
+				<colgroup>
+					<col width="75%" />
+					<col width="25%" />
+				</colgroup>
+				<tr>
+					<th>Materials Name</th>
+					<th>Actions</th>
+				</tr>
+				<?php foreach($purchases['materials'] as $material): ?>
+					<tr>
+						<td>Course materials for <?= $material->getName() ?></td>
+						<td>
+							<?php if($material->getStatus() == Item::PENDING): ?>
+								Pending
+							<?php elseif($material->getStatus() == Item::SUSPENDED): ?>
+								<span style="color: red;">Suspended</span>
+							<?php else: ?>
+								<a href="<?= $material->getUrl() ?>">
+									Download
+								</a>
+							<?php endif; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</table>
+		<?php endif; ?>
+
+		<!--
+		<?php if($subscription->getCurrentCost() > 0): ?>
+			<h2>Subscriptions</h2>
+			<table class="table">
+				<colgroup>
+					<col width="50%">
+					<col width="25%">
+					<col width="25%">
+				</colgroup>
+				<tr>
+					<th>Subscription Item</th>
+					<th colspan="2">Cost</th>
+				</tr>
+				<?php foreach($subscription->getSubscriptionItems() as $subscription_item): ?>
+					<tr>
+						<td><?= $subscription_item->getName() ?></td>
+						<td><?= $subscription_item->getPurchasedCost() ?></td>
+						<td><a href="TODO">Cancel Item</td>
+					</tr>
+				<?php endforeach; ?>
+				<tr>
+					<th>Total Montly Subscription</th>
+					<th><?= $subscription->getCurrentCost() ?></th>
+					<th><a href="TODO">Cancel Entire Subscription</a></th>
+				</tr>
+			</table>
+		<?php endif; ?>
+		-->
+
+	<?php else: ?>
+		<p>No purchases found</p>
+	<?php endif; ?>
+
+	<?php if(GG_LIVE_SERVER && isset($made_purchase)): ?>
+		<iframe 
+			src="https://skilledup.go2cloud.org/aff_l?offer_id=304&amount=<?= $made_purchase ?>"
+			scrolling="no"
+			frameborder="0"
+			width="1"
+			height="1">
+		</iframe>
+	<?php endif; ?>
+</div>
+<?php include(GG_ROOT.'/includes/footer.php'); ?>
