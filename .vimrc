@@ -9,6 +9,10 @@ Plug 'tmhedberg/matchit' " use % to jump to matching html tag
 Plug 'scrooloose/nerdtree' " better file explorer
 Plug 'itchyny/lightline.vim' " pretty status line
 Plug 'ntpeters/vim-better-whitespace' " Highlight trailing whitespace
+Plug 'ctrlpvim/ctrlp.vim' " Open files through search
+Plug 'tpope/vim-fugitive' " Git functions
+Plug 'tpope/vim-unimpaired' " Useful commands
+Plug 'EinfachToll/DidYouMean' " Suggests alternatives for empty filenames
 "syntax
 Plug 'groenewege/vim-less'
 Plug 'StanAngeloff/php.vim'
@@ -84,10 +88,13 @@ set background=dark
 colo tender
 let g:tender_lightline = 1
 let g:lightline = { 'colorscheme': 'tender' }
+let g:ctrlp_by_filename = 1
+let g:ctrlp_max_files = 0
 set title " change the terminal's title
 if has('mouse')
     set mouse=a
 endif
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding Options
@@ -103,3 +110,17 @@ set foldopen-=undo
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 filetype plugin on
 filetype plugin indent off
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Custom mappings
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let mapleader = "\<Space>"
+nnoremap <leader>2 :set tabstop=2<CR>:set shiftwidth=2<CR>:set softtabstop=2<CR>
+nnoremap <leader>4 :set tabstop=4<CR>:set shiftwidth=4<CR>:set softtabstop=4<CR>
+nnoremap <leader>r :%s/^\s*/&&<CR>
+nnoremap <leader>m :%s/<C-v><C-m>//g<CR>
+nnoremap <leader>' :s/'/"/g<CR>
+nnoremap <leader>l I<li><esc>A</li><esc>j
+nnoremap <leader>p I<p><esc>A</p><esc>j
+nnoremap <leader>= :%s/php echo/=/g<CR>
+vnoremap <silent> <leader>r :s/^\s*/&&/<CR>
