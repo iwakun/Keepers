@@ -8,4 +8,4 @@
      [00;31m|_______|  [00;37m With great power comes great responsibility.
      [00;31m \     /   [00;37m Use sudo wisely.
      [00;31m  \___/
-
+[0m
