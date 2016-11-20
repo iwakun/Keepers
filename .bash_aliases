@@ -1,19 +1,13 @@
-# Eli Kirk Live (Hostmonster)
-alias sfs-ek='sshfs -o ServerAliveInterval=15 -o follow_symlinks elikirk@elikirk.com:/var/www/hosts ~/Documents/Websites/Remote/ek'
-alias fu-ek='fusermount -u ~/Documents/Websites/Remote/ek'
-#
 # Caferock
-alias sfs-rock='sshfs -p 229 -o ServerAliveInterval=15 -o follow_symlinks rock@caferock.org: ~/Documents/Websites/Remote/rock'
-alias fu-rock='fusermount -u ~/Documents/Websites/Remote/rock'
+alias sfs-rock='sshfs -p 22922 -o ServerAliveInterval=15 -o follow_symlinks chris@caferock.org: ~/Documents/Programming/Remote/caferock'
+alias fu-rock='fusermount -u ~/Documents/Programming/Remote/caferock'
 
 # Gogogh
-alias sfs-gogogh='sshfs -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@dev.gogogh.com:/var/www/sandbox/chris ~/Documents/Websites/Remote/gogogh'
-alias fu-gogogh='fusermount -u ~/Documents/Websites/Remote/gogogh'
-#
-# Gogogh
-alias sfs-gogoghnew='sshfs -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@dev.gogogh.com:/var/www/sandbox/isaac ~/Documents/Websites/Remote/gogoghnew'
-alias fu-gogoghnew='fusermount -u ~/Documents/Websites/Remote/gogoghnew'
+alias sfs-gogo='sshfs -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@chris.dev.gogotraining.com:/var/www/sandbox/chris ~/Documents/Programming/Remote/gogo'
+alias fu-gogo='fusermount -u ~/Documents/Programming/Remote/gogo'
 
 # Eli Kirk Dev (new)
-alias sfs-ekdev='sshfs -o ServerAliveInterval=15 -o follow_symlinks chris@elikirk-dev.com:/var/www/hosts ~/Documents/Websites/Remote/ekdev'
-alias fu-ekdev='fusermount -u ~/Documents/Websites/Remote/ekdev'
+alias sfs-ekdev='sshfs -o ServerAliveInterval=15 -o follow_symlinks chris@elikirk-dev.com:/var/www/hosts ~/Documents/Programming/Remote/ekdev'
+alias fu-ekdev='fusermount -u ~/Documents/Programming/Remote/ekdev'
+
+alias please='sudo $(history -p !!)'
