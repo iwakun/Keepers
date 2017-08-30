@@ -12,3 +12,5 @@ alias ssh-ekdev='ssh chris@elikirk-dev.com'
 alias sfs-caferock='sshfs -p 22922 -o ServerAliveInterval=15 -o follow_symlinks chris@caferock.org: ~/Programming/Remote/caferock'
 alias fu-caferock='fusermount -u ~/Programming/Remote/caferock'
 alias ssh-caferock='ssh -p 22922 chris@caferock.org'
+
+alias please='sudo $(history -p !!)'
