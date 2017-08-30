@@ -1,19 +1,14 @@
-# Eli Kirk Live (Hostmonster)
-alias sfs-ek='sshfs -o ServerAliveInterval=15 -o follow_symlinks elikirk@elikirk.com:/var/www/hosts ~/Documents/Websites/Remote/ek'
-alias fu-ek='fusermount -u ~/Documents/Websites/Remote/ek'
-#
+# Gogo
+alias sfs-gogo='sshfs -p 22322 -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@chris.dev.gogotraining.com:/var/www/sandbox/chris ~/Programming/Remote/gogo'
+alias fu-gogo='fusermount -u ~/Programming/Remote/gogo'
+alias ssh-gogo='ssh -p 22322 chris@chris.dev.gogotraining.com'
+
+# Eli Kirk Dev
+alias sfs-ekdev='sshfs -o ServerAliveInterval=15 -o follow_symlinks chris@elikirk-dev.com:/var/www/hosts ~/Programming/Remote/ekdev'
+alias fu-ekdev='fusermount -u ~/Programming/Remote/ekdev'
+alias ssh-ekdev='ssh chris@elikirk-dev.com'
+
 # Caferock
-alias sfs-rock='sshfs -p 229 -o ServerAliveInterval=15 -o follow_symlinks rock@caferock.org: ~/Documents/Websites/Remote/rock'
-alias fu-rock='fusermount -u ~/Documents/Websites/Remote/rock'
-
-# Gogogh
-alias sfs-gogogh='sshfs -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@dev.gogogh.com:/var/www/sandbox/chris ~/Documents/Websites/Remote/gogogh'
-alias fu-gogogh='fusermount -u ~/Documents/Websites/Remote/gogogh'
-#
-# Gogogh
-alias sfs-gogoghnew='sshfs -o ServerAliveInterval=15 -o follow_symlinks -o workaround=rename chris@dev.gogogh.com:/var/www/sandbox/isaac ~/Documents/Websites/Remote/gogoghnew'
-alias fu-gogoghnew='fusermount -u ~/Documents/Websites/Remote/gogoghnew'
-
-# Eli Kirk Dev (new)
-alias sfs-ekdev='sshfs -o ServerAliveInterval=15 -o follow_symlinks chris@elikirk-dev.com:/var/www/hosts ~/Documents/Websites/Remote/ekdev'
-alias fu-ekdev='fusermount -u ~/Documents/Websites/Remote/ekdev'
+alias sfs-caferock='sshfs -p 22922 -o ServerAliveInterval=15 -o follow_symlinks chris@caferock.org: ~/Programming/Remote/caferock'
+alias fu-caferock='fusermount -u ~/Programming/Remote/caferock'
+alias ssh-caferock='ssh -p 22922 chris@caferock.org'
