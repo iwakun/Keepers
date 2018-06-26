@@ -14,3 +14,7 @@ alias fu-caferock='fusermount -u ~/Programming/Remote/caferock'
 alias ssh-caferock='ssh -p 22922 chris@caferock.org'
 
 alias please='sudo $(history -p !!)'
+
+# VPN
+alias vpn='/opt/cisco/anyconnect/bin/vpn'
+alias vpnui='/opt/cisco/anyconnect/bin/vpnui'
