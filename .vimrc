@@ -12,6 +12,7 @@ Plug 'ntpeters/vim-better-whitespace' " Highlight trailing whitespace
 Plug 'ctrlpvim/ctrlp.vim' " Open files through search
 Plug 'tpope/vim-fugitive' " Git functions
 Plug 'tpope/vim-unimpaired' " Useful commands
+Plug 'tpope/vim-repeat' " Allow certain plugins to use the . repeat command
 Plug 'EinfachToll/DidYouMean' " Suggests alternatives for empty filenames
 " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' } " Autocomplete
 "syntax
@@ -84,6 +85,7 @@ let g:javascript_enable_domhtmlcss = 1
 
 if has('nvim')
     set termguicolors
+	au TermOpen * setlocal nospell " Turn off spelling in terminal emulator
 endif
 set t_Co=256
 set background=dark
@@ -92,6 +94,7 @@ let g:tender_lightline = 1
 let g:lightline = { 'colorscheme': 'tender' }
 let g:ctrlp_by_filename = 1
 let g:ctrlp_max_files = 0
+let g:ctrlp_custom_ignore = 'node_modules\|vendor\|git'
 set title " change the terminal's title
 if has('mouse')
     set mouse=a
@@ -148,3 +151,7 @@ nnoremap <leader>p I<p><esc>A</p><esc>j
 nnoremap <leader>= :%s/php echo/=/g<CR>
 " c is for clean
 nnoremap <leader>c :%retab!<CR>:StripWhitespace<CR>
+" v is for vue
+nnoremap <leader>v :syntax sync fromstart<CR>
+" ! is for !lessc
+nnoremap <leader>! :!lessc css/styles.less css/styles.min.css<CR>
