@@ -22,6 +22,7 @@ Plug 'pangloss/vim-javascript'
 Plug 'jelera/vim-javascript-syntax'
 Plug 'leafgarland/typescript-vim'
 Plug 'posva/vim-vue'
+Plug 'digitaltoad/vim-pug'
 "themes
 Plug '29decibel/codeschool-vim-theme'
 Plug 'ciaranm/inkpot'
