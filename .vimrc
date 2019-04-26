@@ -14,7 +14,8 @@ Plug 'tpope/vim-fugitive' " Git functions
 Plug 'tpope/vim-unimpaired' " Useful commands
 Plug 'tpope/vim-repeat' " Allow certain plugins to use the . repeat command
 Plug 'EinfachToll/DidYouMean' " Suggests alternatives for empty filenames
-" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' } " Autocomplete
+Plug 'mbbill/undotree' " Visual undo history
+" Plug 'Shougo/deoplete.nvim', { 'do': ':UpourcateRemotePlugins' } " Autocomplete
 "syntax
 Plug 'groenewege/vim-less'
 Plug 'StanAngeloff/php.vim'
@@ -78,6 +79,9 @@ set hidden " keep buffers in memory
 set spell " turn on spelling errors
 set formatoptions+=m " Formatting for multi-byte characters (Japanese)
 set diffopt+=vertical " Vertical split when diffing
+set diffopt+=iwhite " Ignore whitespace when diffing
+set diffopt+=internal,algorithm:patience " Patient algorithm when diffing
+set diffopt+=hiddenoff " Turn diff off when buffer is hidden
 set lazyredraw " Don't redraw when executing macros
 set scrolloff=3 " Don't let the cursor touch the edge of the viewport
 
@@ -104,8 +108,7 @@ endif
 hi SpellBad guifg=#f43753 ctermfg=203 guibg=NONE ctermbg=NONE gui=undercurl cterm=underline
 
 " Autocomplete
-let g:deoplete#enable_at_startup = 1
-
+" let g:deoplete#enable_at_startup = 1
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding Options
@@ -156,3 +159,5 @@ nnoremap <leader>c :%retab!<CR>:StripWhitespace<CR>
 nnoremap <leader>v :syntax sync fromstart<CR>
 " ! is for !lessc
 nnoremap <leader>! :!lessc css/styles.less css/styles.min.css<CR>
+" u is for undo
+nnoremap <leader>u :UndotreeToggle<CR>
