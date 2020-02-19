@@ -4,6 +4,7 @@
 call plug#begin('~/.config/nvim/plugged')
 Plug 'kana/vim-textobj-user' " Custom User Objects
 Plug 'whatyouhide/vim-textobj-xmlattr' " xml attributes as text object
+Plug 'michaeljsmith/vim-indent-object' " indents as text object <count>aI <count>iI
 Plug 'tpope/vim-surround' " adding surrounding selection
 Plug 'tmhedberg/matchit' " use % to jump to matching html tag
 Plug 'scrooloose/nerdtree' " better file explorer
@@ -15,7 +16,7 @@ Plug 'tpope/vim-unimpaired' " Useful commands
 Plug 'tpope/vim-repeat' " Allow certain plugins to use the . repeat command
 Plug 'EinfachToll/DidYouMean' " Suggests alternatives for empty filenames
 Plug 'mbbill/undotree' " Visual undo history
-" Plug 'Shougo/deoplete.nvim', { 'do': ':UpourcateRemotePlugins' } " Autocomplete
+Plug 'junegunn/vim-peekaboo' " Visual display of registers
 "syntax
 Plug 'groenewege/vim-less'
 Plug 'StanAngeloff/php.vim'
@@ -80,8 +81,6 @@ set spell " turn on spelling errors
 set formatoptions+=m " Formatting for multi-byte characters (Japanese)
 set diffopt+=vertical " Vertical split when diffing
 set diffopt+=iwhite " Ignore whitespace when diffing
-set diffopt+=internal,algorithm:patience " Patient algorithm when diffing
-set diffopt+=hiddenoff " Turn diff off when buffer is hidden
 set lazyredraw " Don't redraw when executing macros
 set scrolloff=3 " Don't let the cursor touch the edge of the viewport
 
@@ -105,10 +104,11 @@ if has('mouse')
     set mouse=a
 endif
 " Set underline for misspelling
-hi SpellBad guifg=#f43753 ctermfg=203 guibg=NONE ctermbg=NONE gui=undercurl cterm=underline
-
-" Autocomplete
-" let g:deoplete#enable_at_startup = 1
+hi SpellBad guifg=NONE ctermfg=NONE guibg=NONE ctermbg=NONE gui=undercurl cterm=underline
+" Set transparent background
+hi Normal guibg=NONE ctermbg=NONE
+" Set background for selection
+hi Visual term=reverse cterm=reverse guibg=#333333
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding Options
@@ -155,9 +155,13 @@ nnoremap <leader>p I<p><esc>A</p><esc>j
 nnoremap <leader>= :%s/php echo/=/g<CR>
 " c is for clean
 nnoremap <leader>c :%retab!<CR>:StripWhitespace<CR>
-" v is for vue
+" v is for vue -- recalculates Syntax highlighting
 nnoremap <leader>v :syntax sync fromstart<CR>
 " ! is for !lessc
 nnoremap <leader>! :!lessc css/styles.less css/styles.min.css<CR>
 " u is for undo
 nnoremap <leader>u :UndotreeToggle<CR>
+" d is for Diff
+nnoremap <leader>d :windo diffthis<CR>
+" D is for Diff off
+nnoremap <leader>D :windo diffoff<CR>
