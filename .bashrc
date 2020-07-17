@@ -114,3 +114,10 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+if [ -z "$SSH_CLIENT" ]; then
+	if [ -f ~/.bash_motd ]; then
+		cat ~/.bash_motd
+	fi
+fi
+
