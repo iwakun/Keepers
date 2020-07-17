@@ -116,7 +116,7 @@ if ! shopt -oq posix; then
 fi
 
 if [ -z "$SSH_CLIENT" ]; then
-	if [ -f ~/.bash_motd ]; then
+	if [ -f /etc/motd ]; then
 		cat /etc/motd
 	fi
 fi
