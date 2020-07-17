@@ -117,7 +117,7 @@ fi
 
 if [ -z "$SSH_CLIENT" ]; then
 	if [ -f ~/.bash_motd ]; then
-		cat ~/.bash_motd
+		cat /etc/motd
 	fi
 fi
 
